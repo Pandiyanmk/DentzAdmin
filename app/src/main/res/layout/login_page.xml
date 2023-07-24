@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:background="@color/appColor"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:weightSum="1"
+    tools:context=".view.GetStartedPage">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:gravity="center|top"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="180sp"
+            android:layout_height="180sp"
+            android:src="@drawable/mysmile">
+
+        </ImageView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="60sp"
+            android:orientation="vertical">
+            <!--text view for heading-->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:text="@string/hey"
+                android:textColor="@color/black"
+                android:textSize="25sp" />
+
+            <!--text view for sub heading-->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:text="@string/login_now"
+                android:textColor="@color/black"
+                android:textSize="25sp"
+                android:theme="@style/loginPageSubHeadingTextTheme" />
+
+            <EditText
+                android:id="@+id/userid"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="22dp"
+                android:layout_marginEnd="120sp"
+                android:background="@drawable/custom_edit_text_cut"
+                android:drawableStart="@drawable/user_id"
+                android:drawablePadding="12dp"
+                android:hint="@string/user_id"
+                android:imeOptions="actionNext"
+                android:inputType="text"
+                android:maxLength="15"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:textColor="@color/black" />
+
+            <EditText
+                android:id="@+id/password"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="22dp"
+                android:layout_marginEnd="120sp"
+                android:background="@drawable/custom_edit_text_cut"
+                android:drawableStart="@drawable/password"
+                android:drawablePadding="12dp"
+                android:hint="@string/password"
+                android:imeOptions="actionDone"
+                android:inputType="textPassword"
+                android:maxLength="15"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp"
+                android:textColor="@color/black" />
+
+            <LinearLayout
+                android:id="@+id/forgotpassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20sp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="start"
+                    android:text="@string/forgot_password"
+                    android:textColor="@color/black"
+                    android:textSize="16sp" />
+
+                <!--text view for sub heading-->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="5sp"
+                    android:gravity="start"
+                    android:text="@string/reset_now"
+                    android:textColor="@color/bluecolor"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:theme="@style/loginPageSubHeadingTextTheme" />
+            </LinearLayout>
+
+            <com.apachat.loadingbutton.core.customViews.CircularProgressButton
+                android:id="@+id/loginButton"
+                android:layout_width="150sp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="20sp"
+                android:layout_marginEnd="60sp"
+                android:background="@drawable/buttonback"
+                android:gravity="center"
+                android:text="@string/login"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold">
+
+            </com.apachat.loadingbutton.core.customViews.CircularProgressButton>
+        </LinearLayout>
+    </LinearLayout>
+
+
+</LinearLayout>

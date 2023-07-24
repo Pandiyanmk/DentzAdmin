@@ -1,0 +1,25 @@
+<resources>
+    <string name="app_name">डेन्ट्ज</string>
+    <string name="ok_text">ठिक छ</string>
+    <string name="no_internet">इन्टरनेट जडान छैन</string>
+    <string name="smile_sikkim">मुस्कान सिक्किम</string>
+    <string name="bringing_happiness_to_your_life">तपाईको जीवनमा खुशी ल्याउने</string>
+    <string name="powered_by_srm_sikkim">सार्वजनिक स्वास्थ्य पहल को स्कूल</string>
+    <string name="hey">हे,</string>
+    <string name="login_now">अहिले लगइन गर्नुहोस्।</string>
+    <string name="user_id">प्रयोगकर्ता ID</string>
+    <string name="password">पासवर्ड</string>
+    <string name="forgot_password">पासवर्ड भुल्नु भयो,</string>
+    <string name="reset_now">अब रिसेट गर्नुहोस्</string>
+    <string name="login">लग - इन</string>
+    <string name="please_enter_user_id">कृपया प्रयोगकर्ता आईडी प्रविष्ट गर्नुहोस्</string>
+    <string name="please_enter_password">कृपया पासवर्ड प्रविष्ट गर्नुहोस्</string>
+    <string name="invalid_login_details">अवैध लगइन विवरणहरू</string>
+    <string name="forgot">बिर्सियो</string>
+    <string name="passwords">पासवर्ड?</string>
+    <string name="send_password">पासवर्ड पठाउनुहोस्</string>
+    <string name="password_is_sent_to_the_registered_mobile_number">दर्ता गरिएको मोबाइल नम्बरमा पासवर्ड पठाइन्छ !!!</string>
+    <string name="dentz">डेन्ट्ज</string>
+    <string name="logout">बाहिर निस्कनु</string>
+    <string name="choose_language">भाषा छान्नुहोस्</string>
+</resources>

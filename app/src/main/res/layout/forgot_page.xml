@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center"
+    android:background="@color/appColor"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:weightSum="1"
+    tools:context=".view.GetStartedPage">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="1"
+        android:gravity="top|center"
+        android:orientation="vertical">
+
+        <ImageView
+            android:layout_width="180sp"
+            android:layout_height="180sp"
+            android:src="@drawable/mysmile">
+
+        </ImageView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="60sp"
+            android:layout_marginEnd="40sp"
+            android:orientation="vertical">
+            <!--text view for heading-->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:text="@string/forgot"
+                android:textColor="@color/black"
+                android:textSize="25sp" />
+
+            <!--text view for sub heading-->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="start"
+                android:text="@string/passwords"
+                android:textColor="@color/black"
+                android:textSize="25sp"
+                android:theme="@style/loginPageSubHeadingTextTheme" />
+
+            <EditText
+                android:id="@+id/userid"
+                android:layout_width="match_parent"
+                android:layout_height="60dp"
+                android:layout_marginTop="32dp"
+                android:layout_marginEnd="60sp"
+                android:background="@drawable/custom_edit_text_cut"
+                android:drawableStart="@drawable/user_id"
+                android:drawablePadding="12dp"
+                android:hint="@string/user_id"
+                android:textColor="@color/black"
+                android:imeOptions="actionDone"
+                android:inputType="text"
+                android:maxLength="15"
+                android:paddingStart="12dp"
+                android:paddingEnd="12dp" />
+
+            <TextView
+                android:id="@+id/sent"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20sp"
+                android:layout_marginEnd="40sp"
+                android:gravity="start"
+                android:text="@string/password_is_sent_to_the_registered_mobile_number"
+                android:textColor="@color/green"
+                android:textSize="20sp"
+                android:theme="@style/loginPageSubHeadingTextTheme"
+                android:visibility="gone" />
+
+
+            <com.apachat.loadingbutton.core.customViews.CircularProgressButton
+                android:id="@+id/loginButton"
+                android:layout_width="210sp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="20sp"
+                android:layout_marginEnd="25sp"
+                android:background="@drawable/buttonback"
+                android:gravity="center"
+                android:text="@string/send_password"
+                android:textColor="@color/white"
+                android:textSize="20sp"
+                android:textStyle="bold">
+
+            </com.apachat.loadingbutton.core.customViews.CircularProgressButton>
+        </LinearLayout>
+    </LinearLayout>
+
+
+</LinearLayout>

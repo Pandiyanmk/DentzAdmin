@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "718284457396",
+    "firebase_url": "https://taxi4ubetadriver.firebaseio.com",
+    "project_id": "taxi4ubetadriver",
+    "storage_bucket": "taxi4ubetadriver.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:718284457396:android:dbb88599f6e67073795ee1",
+        "android_client_info": {
+          "package_name": "com.app.bloodbank"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "718284457396-g1io95339a0dn1d5b3id9332o72khr49.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.app.bloodbank",
+            "certificate_hash": "9a607d2af1223465cf34eb03206344a21a4d9708"
+          }
+        },
+        {
+          "client_id": "718284457396-gcd34htaia4u7oca6ubofaumnfp1rorc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCIFyoofnbfTm4u74yvQw1NUf23WFvgAeQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "718284457396-gcd34htaia4u7oca6ubofaumnfp1rorc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
