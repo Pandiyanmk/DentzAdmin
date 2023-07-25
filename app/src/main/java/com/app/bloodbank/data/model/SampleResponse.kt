@@ -5,6 +5,9 @@ data class SampleResponse(
     val audio: String,
     val video: String,
     val password: String,
+    val group: ArrayList<Group>,
     val questions: List<Question>,
+    val message: ArrayList<Message>,
+    val maxselect: Int,
     val userId: String
 )

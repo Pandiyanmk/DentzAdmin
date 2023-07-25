@@ -1,10 +1,9 @@
 package com.app.bloodbank.view
 
 import android.content.Intent
-import android.media.MediaPlayer
-import android.net.Uri
 import android.os.Bundle
 import android.os.CountDownTimer
+import android.os.Handler
 import android.speech.tts.TextToSpeech
 import android.view.View
 import android.view.animation.AccelerateInterpolator
@@ -13,6 +12,7 @@ import android.view.animation.TranslateAnimation
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
+import android.widget.RelativeLayout
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
@@ -20,12 +20,16 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.app.bloodbank.R
+import com.app.bloodbank.data.model.Group
+import com.app.bloodbank.data.model.Message
 import com.app.bloodbank.repository.MainRepository
 import com.app.bloodbank.util.CommonUtil
+import com.app.bloodbank.view.HomePage.ProgressTracker.PositionListener
 import com.app.bloodbank.viewModel.CommonViewModel
 import com.app.bloodbank.viewModel.CommonViewModelFactory
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
+import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.ui.StyledPlayerView
@@ -43,32 +47,43 @@ import java.util.concurrent.TimeUnit
 
 class HomePage : AppCompatActivity() {
     private val cu = CommonUtil()
+    var isStart = false
     var isHasVideoUrl = ""
     private var loading: ProgressBar? = null
     private var donarList: RecyclerView? = null
+    private var groupList: RecyclerView? = null
+    private var messageList: RecyclerView? = null
     private lateinit var aboutPageViewModel: CommonViewModel
     var textToSpeech: TextToSpeech? = null
     private var konfettiView: KonfettiView? = null
     var speak: FloatingActionButton? = null
     private var timer: CountDownTimer? = null
-
-
+    var groupListData: ArrayList<Group>? = null
+    var messageListData: ArrayList<Message>? = null
     private var play: FloatingActionButton? = null
     private var next: FloatingActionButton? = null
     private var prev: FloatingActionButton? = null
     private var replay: FloatingActionButton? = null
     private var forward: FloatingActionButton? = null
 
+    private var textContent: LinearLayout? = null
+    private var loaderView: RelativeLayout? = null
+    private var videoContent: LinearLayout? = null
+    private var audioContent: LinearLayout? = null
+
     private var textEnd: TextView? = null
     private var textStart: TextView? = null
+    private var messagecontent: TextView? = null
 
     private var seekMusicBar: SeekBar? = null
     var imageView: ImageView? = null
-    var mediaPlayer: MediaPlayer? = null
-    var updateSeek: Thread? = null
-    var stopThread = false
     private lateinit var simpleExoPlayer: ExoPlayer
     lateinit var playerView: StyledPlayerView
+    lateinit var groupAdapter: GroupAdapter
+    lateinit var messageAdapter: MessageAdapter
+    var tracker: ProgressTracker? = null
+
+    var audioExoPlayer: ExoPlayer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,13 +100,16 @@ class HomePage : AppCompatActivity() {
         /* SetUp Views */
         loading = findViewById(R.id.loading)
         donarList = findViewById(R.id.donarList)
-        val messagecontent = findViewById<TextView>(R.id.messagecontent)
-        val textContent = findViewById<LinearLayout>(R.id.textContent)
-        val videoContent = findViewById<LinearLayout>(R.id.videoContent)
-        val audioContent = findViewById<LinearLayout>(R.id.audioContent)
+        groupList = findViewById(R.id.groupList)
+        messageList = findViewById(R.id.messageList)
+        messagecontent = findViewById<TextView>(R.id.messagecontent)
+        textContent = findViewById(R.id.textContent)
+        videoContent = findViewById(R.id.videoContent)
+        audioContent = findViewById(R.id.audioContent)
         val profile = findViewById<ImageView>(R.id.profile)
         konfettiView = findViewById(R.id.konfettiView)
         playerView = findViewById(R.id.playerView)
+        loaderView = findViewById(R.id.loaderView)
 
         play = findViewById(R.id.playBtn)
         next = findViewById(R.id.nextBtn)
@@ -119,12 +137,12 @@ class HomePage : AppCompatActivity() {
         }
 
         play!!.setOnClickListener {
-            if (mediaPlayer!!.isPlaying) {
+            if (audioExoPlayer!!.isPlaying) {
+                audioExoPlayer!!.pause()
                 play!!.setImageResource(R.drawable.ic_play)
-                mediaPlayer!!.pause()
             } else {
                 play!!.setImageResource(R.drawable.ic_pause)
-                mediaPlayer!!.start()
+                audioExoPlayer!!.play()
                 val animation = TranslateAnimation(-25f, 25f, -25f, 25f)
                 animation.interpolator = AccelerateInterpolator()
                 animation.duration = 600
@@ -136,21 +154,23 @@ class HomePage : AppCompatActivity() {
             }
         }
         replay!!.setOnClickListener { _: View? ->
-            mediaPlayer!!.seekTo(
-                mediaPlayer!!.currentPosition - 10000
+            audioExoPlayer!!.seekTo(
+                audioExoPlayer!!.currentPosition - 10000
             )
         }
 
         forward!!.setOnClickListener {
-            mediaPlayer!!.seekTo(
-                mediaPlayer!!.currentPosition + 10000
+            audioExoPlayer!!.seekTo(
+                audioExoPlayer!!.currentPosition + 10000
             )
         }
 
         speak!!.setOnClickListener {
             if (!textToSpeech!!.isSpeaking) {
                 speak!!.setImageResource(R.drawable.stop)
-                textToSpeech?.speak(messagecontent.text.toString(), TextToSpeech.QUEUE_FLUSH, null)
+                textToSpeech?.speak(
+                    messagecontent!!.text.toString(), TextToSpeech.QUEUE_FLUSH, null
+                )
                 timer?.let {
                     it.cancel()
                     timer = null
@@ -176,73 +196,39 @@ class HomePage : AppCompatActivity() {
             }
         }
 
-        updateSeek = object : Thread() {
-            override fun run() {
-                while (!stopThread) {
-                    try {
-                        if (mediaPlayer != null) {
-                            val currentPosition = mediaPlayer!!.currentPosition.toLong()
-                            val format = String.format(
-                                "%02d:%02d", java.lang.Long.valueOf(
-                                    TimeUnit.MILLISECONDS.toMinutes(currentPosition)
-                                ), java.lang.Long.valueOf(
-                                    TimeUnit.MILLISECONDS.toSeconds(currentPosition) - TimeUnit.MINUTES.toSeconds(
-                                        TimeUnit.MILLISECONDS.toMinutes(currentPosition)
-                                    )
-                                )
-                            )
-                            runOnUiThread { textStart!!.text = format }
-                            seekMusicBar!!.progress = mediaPlayer!!.currentPosition
-                            sleep(200)
-                        }
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
-                }
-            }
-        }
+
         aboutPageViewModel.responseContent.observe(this) { result ->
             loading!!.visibility = View.GONE
-            if (result.messageText.isNotEmpty()) {
-                textTpSpeech()
-                speak!!.visibility = View.VISIBLE
-                textContent.visibility = View.VISIBLE
-                messagecontent.text = result.messageText
-            } else if (result.audio.isNotEmpty()) {
-                audioContent.visibility = View.VISIBLE
-                val uri = Uri.parse(result.audio)
-                mediaPlayer = MediaPlayer.create(applicationContext, uri)
-                seekMusicBar!!.max = mediaPlayer!!.duration
-                val duration = mediaPlayer!!.duration.toLong()
-                textEnd!!.text = String.format(
-                    "%02d:%02d",
-                    java.lang.Long.valueOf(TimeUnit.MILLISECONDS.toMinutes(duration)),
-                    java.lang.Long.valueOf(
-                        TimeUnit.MILLISECONDS.toSeconds(duration) - TimeUnit.MINUTES.toSeconds(
-                            TimeUnit.MILLISECONDS.toMinutes(duration)
-                        )
-                    )
-                )
-                updateSeek!!.start()
-                stopThread = false
-                mediaPlayer!!.setOnCompletionListener {
-                    if (mediaPlayer != null) {
-                        play!!.setImageResource(R.drawable.ic_play)
-                        mediaPlayer!!.seekTo(0)
-                        mediaPlayer!!.start()
-                        mediaPlayer!!.pause()
-                    }
-                }
-            } else if (result.video.isNotEmpty()) {
-                isHasVideoUrl = result.video
-                videoContent.visibility = View.VISIBLE
-                initializePlayer(result.video)
-            }
+            groupListData = result.group
+            groupList!!.layoutManager =
+                LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+            groupAdapter = GroupAdapter(this, groupListData!!, result.maxselect)
+            groupList!!.adapter = groupAdapter
+
+            messageListData = result.message
+            messageList!!.layoutManager =
+                LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+            messageAdapter = MessageAdapter(this, messageListData!!)
+            messageList!!.adapter = messageAdapter
+
+            val mData = Message(messageListData!![0].content, 1)
+            messageListData!![0] = mData
+            messageAdapter.notifyDataSetChanged()
 
 
             donarList!!.layoutManager = LinearLayoutManager(this)
             val adapter = DonarAdapter(this, result.questions)
             donarList!!.adapter = adapter
+
+            if (messageListData!!.size > 0) {
+                if (messageListData!![0].content.endsWith("mp3")) {
+                    setContent("audio", messageListData!![0].content)
+                } else if (messageListData!![0].content.endsWith("mp4")) {
+                    setContent("video", messageListData!![0].content)
+                } else {
+                    setContent("text", messageListData!![0].content)
+                }
+            }
         }
     }
 
@@ -269,7 +255,25 @@ class HomePage : AppCompatActivity() {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: String?) {
-        konfettiView!!.start(Presets.explode())
+        if (event.equals("done")) {
+            konfettiView!!.start(Presets.explode())
+        } else if (event!!.startsWith("message")) {
+            val splitValue = event!!.split(",")
+            val postion = splitValue[1].toInt()
+            //val mData = Group(groupListData!![splitValue[1].toInt()].name, 1)
+            if (messageListData!![postion].content.endsWith("mp3")) {
+                setContent("audio", messageListData!![postion].content)
+            } else if (messageListData!![postion].content.endsWith("mp4")) {
+                setContent("video", messageListData!![postion].content)
+            } else {
+                setContent("text", messageListData!![postion].content)
+            }
+        } else {
+            val splitValue = event!!.split(",")
+            val gData = Group(groupListData!![splitValue[0].toInt()].name, splitValue[1].toInt())
+            groupListData!![splitValue[0].toInt()] = gData
+            groupAdapter.notifyDataSetChanged()
+        }
     }
 
     private fun initializePlayer(url: String) {
@@ -317,10 +321,11 @@ class HomePage : AppCompatActivity() {
             it.stop()
             speak!!.setImageResource(R.drawable.speak)
         }
-        mediaPlayer?.let {
-            if (mediaPlayer!!.isPlaying) {
+        audioExoPlayer?.let {
+            if (audioExoPlayer!!.isPlaying) {
                 play!!.setImageResource(R.drawable.ic_play)
-                mediaPlayer!!.pause()
+                audioExoPlayer!!.pause()
+                stopAudio()
             }
         }
         if (isHasVideoUrl.isNotEmpty()) {
@@ -343,10 +348,172 @@ class HomePage : AppCompatActivity() {
         textToSpeech?.let {
             it.shutdown()
         }
-        mediaPlayer?.let {
+        audioExoPlayer?.let {
             it.stop()
-            it.reset()
             it.release()
+        }
+    }
+
+    private fun setContent(type: String, content: String) {
+        when (type) {
+            "text" -> {
+                stopAudio()
+                stopVideoPlayer()
+                textTpSpeech()
+                speak!!.visibility = View.VISIBLE
+                textContent!!.visibility = View.VISIBLE
+                videoContent!!.visibility = View.GONE
+                audioContent!!.visibility = View.GONE
+                messagecontent!!.text = content
+            }
+
+            "audio" -> {
+                stopAudio()
+                stopVideoPlayer()
+                play!!.setImageResource(R.drawable.ic_play)
+                loaderView!!.visibility = View.VISIBLE
+                textContent!!.visibility = View.GONE
+                videoContent!!.visibility = View.GONE
+                audioContent!!.visibility = View.VISIBLE
+
+                val mediaDataSourceFactory: DataSource.Factory = DefaultDataSource.Factory(this)
+
+                val mediaSource = ProgressiveMediaSource.Factory(mediaDataSourceFactory)
+                    .createMediaSource(MediaItem.fromUri(content))
+
+                val mediaSourceFactory = DefaultMediaSourceFactory(mediaDataSourceFactory)
+
+                audioExoPlayer =
+                    ExoPlayer.Builder(this).setMediaSourceFactory(mediaSourceFactory).build()
+                audioExoPlayer?.let {
+                    it.addMediaSource(mediaSource)
+                    it.prepare()
+
+                    it.addListener(object : Player.Listener {
+                        override fun onPlayerStateChanged(
+                            playWhenReady: Boolean, playbackState: Int
+                        ) {
+                            when (playbackState) {
+                                ExoPlayer.STATE_BUFFERING -> {}
+                                ExoPlayer.STATE_ENDED -> {
+                                    play!!.setImageResource(R.drawable.ic_play)
+                                    it.seekTo(0)
+                                    it.playWhenReady = true
+                                    it.pause()
+                                }
+
+                                ExoPlayer.STATE_IDLE -> {}
+                                ExoPlayer.STATE_READY -> {
+                                    val totalSeconds = it.duration
+                                    if (totalSeconds > 1) {
+                                        loaderView!!.visibility = View.GONE
+                                    }
+                                    seekMusicBar!!.max = it.duration.toInt() / 1000
+                                    textEnd!!.text = String.format(
+                                        "%02d:%02d", java.lang.Long.valueOf(
+                                            TimeUnit.MILLISECONDS.toMinutes(
+                                                totalSeconds
+                                            )
+                                        ), java.lang.Long.valueOf(
+                                            TimeUnit.MILLISECONDS.toSeconds(totalSeconds) - TimeUnit.MINUTES.toSeconds(
+                                                TimeUnit.MILLISECONDS.toMinutes(totalSeconds)
+                                            )
+                                        )
+                                    )
+                                    if (!isStart) {
+                                        isStart = true
+                                        var tracker =
+                                            ProgressTracker(it, object : PositionListener {
+                                                override fun progress(position: Long) {
+                                                    val currentPosition =
+                                                        audioExoPlayer!!.currentPosition
+                                                    val format = String.format(
+                                                        "%02d:%02d", java.lang.Long.valueOf(
+                                                            TimeUnit.MILLISECONDS.toMinutes(
+                                                                currentPosition
+                                                            )
+                                                        ), java.lang.Long.valueOf(
+                                                            TimeUnit.MILLISECONDS.toSeconds(
+                                                                currentPosition
+                                                            ) - TimeUnit.MINUTES.toSeconds(
+                                                                TimeUnit.MILLISECONDS.toMinutes(
+                                                                    currentPosition
+                                                                )
+                                                            )
+                                                        )
+                                                    )
+                                                    runOnUiThread { textStart!!.text = format }
+                                                    seekMusicBar!!.progress =
+                                                        audioExoPlayer!!.currentPosition.toInt() / 1000
+                                                }
+                                            })
+                                    }
+                                }
+
+                                else -> {
+                                }
+                            }
+                        }
+                    })
+                }
+
+            }
+
+            "video" -> {
+                stopVideoPlayer()
+                stopAudio()
+                isStart = false
+                isHasVideoUrl = content
+                textContent!!.visibility = View.GONE
+                videoContent!!.visibility = View.VISIBLE
+                audioContent!!.visibility = View.GONE
+                initializePlayer(content)
+            }
+        }
+    }
+
+
+    class ProgressTracker(
+        private val player: Player, private val positionListener: PositionListener
+    ) : Runnable {
+        interface PositionListener {
+            fun progress(position: Long)
+        }
+
+        private val handler: Handler = Handler()
+
+        init {
+            handler.post(this)
+        }
+
+        override fun run() {
+            val position = player.currentPosition
+            positionListener.progress(position)
+            handler.postDelayed(this, 500)
+        }
+
+        fun purgeHandler() {
+            handler.removeCallbacks(this)
+        }
+    }
+
+    private fun stopAudio() {
+        if (isStart) {
+            tracker?.let {
+                it.purgeHandler()
+            }
+            audioExoPlayer?.let {
+                it.pause()
+            }
+            isStart = false
+        }
+    }
+
+    fun stopVideoPlayer() {
+        if (isHasVideoUrl.isNotEmpty()) {
+            simpleExoPlayer?.let {
+                releasePlayer()
+            }
         }
     }
 }

@@ -22,4 +22,8 @@
     <string name="dentz">डेन्ट्ज</string>
     <string name="logout">बाहिर निस्कनु</string>
     <string name="choose_language">भाषा छान्नुहोस्</string>
+    <string name="limit_exceed">सीमा नाघ्यो</string>
+    <string name="choose_group">समूह छान्नुहोस्</string>
+    <string name="questions">विकल्पहरू</string>
+    <string name="choose_message">सन्देश छान्नुहोस्</string>
 </resources>

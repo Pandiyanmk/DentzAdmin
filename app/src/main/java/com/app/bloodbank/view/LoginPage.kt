@@ -62,7 +62,6 @@ class LoginPage : AppCompatActivity() {
         commonViewModel.errorMessage.observe(this) { errorMessage ->
             cu.showAlert(errorMessage, this)
             loginButton.revertAnimation()
-
         }
 
         commonViewModel.responseContent.observe(this) { result ->

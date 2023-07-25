@@ -68,6 +68,53 @@
                 android:orientation="vertical">
 
                 <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20sp"
+                        android:text="@string/choose_message"
+                        android:textColor="@color/black"
+                        android:textSize="20sp"
+                        android:textStyle="bold" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/messageList"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom"
+                        android:layout_marginStart="30sp"
+                        android:layout_marginTop="5sp"
+                        android:layout_marginEnd="30sp"
+                        android:layout_marginBottom="5sp"
+                        tools:itemCount="1"
+                        tools:listitem="@layout/message_item" />
+
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20sp"
+                    android:text="@string/choose_group"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/groupList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginStart="20sp"
+                    android:layout_marginEnd="30sp"
+                    tools:itemCount="1"
+                    tools:listitem="@layout/group_item" />
+
+                <LinearLayout
                     android:id="@+id/textContent"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -112,7 +159,7 @@
                         android:id="@+id/img"
                         android:layout_width="90dp"
                         android:layout_height="90dp"
-                        android:layout_marginTop="40sp"
+                        android:layout_marginTop="10sp"
                         android:layout_marginBottom="6dp"
                         android:padding="10dp"
                         android:src="@drawable/music" />
@@ -135,7 +182,7 @@
                             android:layout_centerInParent="true"
                             android:layout_marginLeft="5dp"
                             android:layout_toLeftOf="@id/seekBar"
-                            android:text="0:20"
+                            android:text="00:00"
                             android:textColor="@color/black"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -147,7 +194,7 @@
                             android:layout_centerInParent="true"
                             android:layout_marginRight="5dp"
                             android:layout_toRightOf="@id/seekBar"
-                            android:text="3:20"
+                            android:text=""
                             android:textColor="@color/black"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -211,12 +258,6 @@
                             android:padding="10sp"
                             android:src="@drawable/ic_forward" />
                     </LinearLayout>
-
-                    <com.chibde.visualizer.SquareBarVisualizer
-                        android:id="@+id/visualizer"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:layout_marginTop="15dp" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -228,6 +269,7 @@
                     android:gravity="center"
                     android:orientation="vertical"
                     android:visibility="gone">
+
                     <com.google.android.exoplayer2.ui.StyledPlayerView
                         android:id="@+id/playerView"
                         android:layout_width="match_parent"
@@ -245,17 +287,28 @@
 
                 </LinearLayout>
 
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="20sp"
+                    android:text="@string/questions"
+                    android:textColor="@color/black"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/donarList"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="bottom"
+                    android:layout_marginStart="20sp"
+                    android:layout_marginBottom="10sp"
+                    tools:itemCount="1"
+                    tools:listitem="@layout/donar_item" />
+
 
             </LinearLayout>
 
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/donarList"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="bottom"
-                android:layout_marginBottom="10sp"
-                tools:itemCount="1"
-                tools:listitem="@layout/donar_item" />
 
         </LinearLayout>
 
@@ -271,6 +324,23 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center" />
+
+        <RelativeLayout
+            android:id="@+id/loaderView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#55494646"
+            android:clickable="true"
+            android:visibility="gone">
+
+            <ProgressBar
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:layout_gravity="center" />
+        </RelativeLayout>
 
 
     </FrameLayout>
