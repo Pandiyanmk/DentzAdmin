@@ -16,20 +16,20 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
-            android:name="com.app.bloodbank.view.HomePage"
+            android:name="com.app.dentzadmin.view.HomePage"
             android:exported="false"></activity>
         <activity
-            android:name="com.app.bloodbank.view.ProfilePage"
+            android:name="com.app.dentzadmin.view.ProfilePage"
             android:exported="false"></activity>
         <activity
-            android:name="com.app.bloodbank.view.ForgotPage"
+            android:name="com.app.dentzadmin.view.ForgotPage"
             android:exported="false" />
         <activity
-            android:name="com.app.bloodbank.view.LoginPage"
+            android:name="com.app.dentzadmin.view.LoginPage"
             android:exported="false"
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize" />
         <activity
-            android:name="com.app.bloodbank.view.GetStartedPage"
+            android:name="com.app.dentzadmin.view.GetStartedPage"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

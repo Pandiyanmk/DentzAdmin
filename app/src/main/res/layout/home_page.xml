@@ -26,7 +26,7 @@
 
         <ImageView
             android:layout_width="60sp"
-            android:layout_height="60sp"
+            android:layout_height="40sp"
             android:layout_weight="1"
             android:src="@drawable/homepagedental" />
 
@@ -73,12 +73,14 @@
                     android:orientation="vertical">
 
                     <TextView
+                        android:id="@+id/choosemessage"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginStart="20sp"
                         android:text="@string/choose_message"
                         android:textColor="@color/black"
                         android:textSize="20sp"
+                        android:visibility="gone"
                         android:textStyle="bold" />
 
                     <androidx.recyclerview.widget.RecyclerView
@@ -96,10 +98,12 @@
                 </LinearLayout>
 
                 <TextView
+                    android:id="@+id/choosegroup"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20sp"
                     android:text="@string/choose_group"
+                    android:visibility="gone"
                     android:textColor="@color/black"
                     android:textSize="20sp"
                     android:textStyle="bold" />
@@ -130,7 +134,7 @@
                         android:layout_margin="20sp"
                         android:gravity="center"
                         android:textColor="@color/black"
-                        android:textSize="33sp"
+                        android:textSize="23sp"
                         android:textStyle="normal" />
 
                     <com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -154,15 +158,6 @@
                     android:gravity="center"
                     android:orientation="vertical"
                     android:visibility="gone">
-
-                    <ImageView
-                        android:id="@+id/img"
-                        android:layout_width="90dp"
-                        android:layout_height="90dp"
-                        android:layout_marginTop="10sp"
-                        android:layout_marginBottom="6dp"
-                        android:padding="10dp"
-                        android:src="@drawable/music" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -263,7 +258,7 @@
                 <LinearLayout
                     android:id="@+id/videoContent"
                     android:layout_width="match_parent"
-                    android:layout_height="250dp"
+                    android:layout_height="150dp"
                     android:layout_margin="20sp"
                     android:background="@drawable/board"
                     android:gravity="center"
@@ -288,12 +283,14 @@
                 </LinearLayout>
 
                 <TextView
+                    android:id="@+id/choosoptions"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20sp"
                     android:text="@string/questions"
                     android:textColor="@color/black"
                     android:textSize="20sp"
+                    android:visibility="gone"
                     android:textStyle="bold" />
 
                 <androidx.recyclerview.widget.RecyclerView
@@ -309,6 +306,15 @@
 
             </LinearLayout>
 
+            <com.google.android.material.floatingactionbutton.FloatingActionButton
+                android:id="@+id/send"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="right"
+                android:layout_marginEnd="20sp"
+                android:layout_marginBottom="20sp"
+                android:padding="10sp"
+                android:src="@drawable/baseline_send" />
 
         </LinearLayout>
 

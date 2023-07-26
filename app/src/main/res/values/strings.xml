@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Dentz</string>
+    <string name="app_name">Dentz Admin</string>
     <string name="ok_text">OK</string>
     <string name="no_internet">No Internet Connection</string>
     <string name="smile_sikkim">Smile Sikkim</string>
@@ -26,4 +26,7 @@
     <string name="choose_group">Choose Group</string>
     <string name="questions">Options</string>
     <string name="choose_message">Choose Message</string>
+    <string name="push">PUSH</string>
+    <string name="please_select_group">Please select group</string>
+    <string name="sent">sent</string>
 </resources>

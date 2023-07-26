@@ -26,4 +26,7 @@
     <string name="choose_group">समूह छान्नुहोस्</string>
     <string name="questions">विकल्पहरू</string>
     <string name="choose_message">सन्देश छान्नुहोस्</string>
+    <string name="push">धक्का</string>
+    <string name="please_select_group">कृपया समूह चयन गर्नुहोस्</string>
+    <string name="sent">पठाइयो</string>
 </resources>
