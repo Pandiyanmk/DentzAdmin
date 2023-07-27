@@ -20,14 +20,14 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="10sp"
             android:text="@string/dentz"
+            android:fontFamily="@font/regular"
             android:textColor="@color/black"
             android:textSize="20sp"
-            android:fontFamily="@font/regular"
             android:textStyle="bold" />
 
         <ImageView
             android:layout_width="60sp"
-            android:layout_height="40sp"
+            android:layout_height="60sp"
             android:layout_weight="1"
             android:src="@drawable/homepagedental" />
 
@@ -69,62 +69,6 @@
                 android:orientation="vertical">
 
                 <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <TextView
-                        android:id="@+id/choosemessage"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginStart="20sp"
-                        android:text="@string/choose_message"
-                        android:fontFamily="@font/regular"
-                        android:textColor="@color/black"
-                        android:textSize="19sp"
-                        android:layout_marginBottom="5dp"
-                        android:visibility="gone"
-                        android:textStyle="bold" />
-
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/messageList"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="bottom"
-                        android:layout_marginStart="30sp"
-                        android:layout_marginTop="5sp"
-                        android:layout_marginEnd="30sp"
-                        android:layout_marginBottom="5sp"
-                        tools:itemCount="1"
-                        tools:listitem="@layout/message_item" />
-
-                </LinearLayout>
-
-                <TextView
-                    android:layout_marginTop="5sp"
-                    android:id="@+id/choosegroup"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20sp"
-                    android:text="@string/choose_group"
-                    android:visibility="gone"
-                    android:fontFamily="@font/regular"
-                    android:textColor="@color/black"
-                    android:textSize="19sp"
-                    android:layout_marginBottom="5dp"
-                    android:textStyle="bold" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/groupList"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:layout_marginStart="20sp"
-                    android:layout_marginEnd="30sp"
-                    tools:itemCount="1"
-                    tools:listitem="@layout/group_item" />
-
-                <LinearLayout
                     android:id="@+id/textContent"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -139,12 +83,22 @@
                         android:layout_height="wrap_content"
                         android:layout_margin="20sp"
                         android:gravity="center"
-                        android:fontFamily="@font/regular"
                         android:textColor="@color/black"
-                        android:textSize="17sp"
-                        android:textStyle="bold" />
+                        android:textSize="33sp"
+                        android:fontFamily="@font/regular"
+                        android:textStyle="normal" />
 
-                     </LinearLayout>
+                    <com.google.android.material.floatingactionbutton.FloatingActionButton
+                        android:id="@+id/speak"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_marginEnd="20sp"
+                        android:layout_marginBottom="20sp"
+                        android:padding="10sp"
+                        android:src="@drawable/speak"
+                        android:visibility="gone" />
+                </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/audioContent"
@@ -155,6 +109,15 @@
                     android:gravity="center"
                     android:orientation="vertical"
                     android:visibility="gone">
+
+                    <ImageView
+                        android:id="@+id/img"
+                        android:layout_width="90dp"
+                        android:layout_height="90dp"
+                        android:layout_marginTop="40sp"
+                        android:layout_marginBottom="6dp"
+                        android:padding="10dp"
+                        android:src="@drawable/music" />
 
                     <RelativeLayout
                         android:layout_width="match_parent"
@@ -174,21 +137,19 @@
                             android:layout_centerInParent="true"
                             android:layout_marginLeft="5dp"
                             android:layout_toLeftOf="@id/seekBar"
-                            android:text="00:00"
-                            android:fontFamily="@font/regular"
+                            android:text="0:20"
                             android:textColor="@color/black"
                             android:textSize="16sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:id="@+id/txtSongEnd"
-                            android:fontFamily="@font/regular"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerInParent="true"
                             android:layout_marginRight="5dp"
                             android:layout_toRightOf="@id/seekBar"
-                            android:text=""
+                            android:text="3:20"
                             android:textColor="@color/black"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -252,12 +213,14 @@
                             android:padding="10sp"
                             android:src="@drawable/ic_forward" />
                     </LinearLayout>
+
+
                 </LinearLayout>
 
                 <LinearLayout
                     android:id="@+id/videoContent"
                     android:layout_width="match_parent"
-                    android:layout_height="150dp"
+                    android:layout_height="250dp"
                     android:layout_margin="20sp"
                     android:background="@drawable/board"
                     android:gravity="center"
@@ -281,42 +244,25 @@
 
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/choosoptions"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="20sp"
-                    android:text="@string/questions"
-                    android:fontFamily="@font/regular"
-                    android:textColor="@color/black"
-                    android:textSize="19sp"
-                    android:visibility="gone"
-                    android:textStyle="bold" />
-
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/donarList"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom"
-                    android:layout_marginStart="20sp"
-                    android:layout_marginBottom="10sp"
-                    tools:itemCount="1"
-                    tools:listitem="@layout/donar_item" />
-
 
             </LinearLayout>
 
-            <com.google.android.material.floatingactionbutton.FloatingActionButton
-                android:id="@+id/send"
-                android:layout_width="wrap_content"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/donarList"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_marginEnd="20sp"
-                android:layout_marginBottom="20sp"
-                android:padding="10sp"
-                android:src="@drawable/baseline_send" />
+                android:layout_gravity="bottom"
+                android:layout_marginBottom="10sp"
+                tools:itemCount="1"
+                tools:listitem="@layout/donar_item" />
 
         </LinearLayout>
+
+        <nl.dionsegijn.konfetti.xml.KonfettiView
+            android:id="@+id/konfettiView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center" />
 
         <ProgressBar
             android:id="@+id/loading"
@@ -324,23 +270,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center" />
-
-        <RelativeLayout
-            android:id="@+id/loaderView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="#55494646"
-            android:clickable="true"
-            android:visibility="gone">
-
-            <ProgressBar
-                style="?android:attr/progressBarStyle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_centerHorizontal="true"
-                android:layout_centerVertical="true"
-                android:layout_gravity="center" />
-        </RelativeLayout>
 
 
     </FrameLayout>

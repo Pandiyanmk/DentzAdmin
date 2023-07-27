@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -34,6 +35,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/regular"
                 android:gravity="start"
                 android:text="@string/hey"
                 android:textColor="@color/black"
@@ -43,6 +45,7 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:fontFamily="@font/regular"
                 android:gravity="start"
                 android:text="@string/login_now"
                 android:textColor="@color/black"
@@ -58,6 +61,7 @@
                 android:background="@drawable/custom_edit_text_cut"
                 android:drawableStart="@drawable/user_id"
                 android:drawablePadding="12dp"
+                android:fontFamily="@font/regular"
                 android:hint="@string/user_id"
                 android:imeOptions="actionNext"
                 android:inputType="text"
@@ -75,6 +79,7 @@
                 android:background="@drawable/custom_edit_text_cut"
                 android:drawableStart="@drawable/password"
                 android:drawablePadding="12dp"
+                android:fontFamily="@font/regular"
                 android:hint="@string/password"
                 android:imeOptions="actionDone"
                 android:inputType="textPassword"
@@ -93,6 +98,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:fontFamily="@font/regular"
                     android:gravity="start"
                     android:text="@string/forgot_password"
                     android:textColor="@color/black"
@@ -103,6 +109,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5sp"
+                    android:fontFamily="@font/regular"
                     android:gravity="start"
                     android:text="@string/reset_now"
                     android:textColor="@color/bluecolor"
@@ -119,6 +126,7 @@
                 android:layout_marginTop="20sp"
                 android:layout_marginEnd="60sp"
                 android:background="@drawable/buttonback"
+                android:fontFamily="@font/regular"
                 android:gravity="center"
                 android:text="@string/login"
                 android:textColor="@color/white"
@@ -126,6 +134,85 @@
                 android:textStyle="bold">
 
             </com.apachat.loadingbutton.core.customViews.CircularProgressButton>
+
+            <TextView
+                android:id="@+id/tvName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="20sp"
+                android:layout_marginEnd="60sp"
+                android:fontFamily="@font/regular"
+                android:gravity="center"
+                android:text="@string/choose_language"
+                android:textColor="@color/black"
+                android:textSize="16sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="55sp"
+                android:gravity="left">
+
+                <LinearLayout
+                    android:id="@+id/us"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="10dp"
+                        android:padding="5dp"
+                        app:srcCompat="@drawable/usflag" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:fontFamily="@font/regular"
+                        android:gravity="center"
+                        android:text="English"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/india"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30sp"
+                    android:gravity="center"
+                    android:orientation="vertical">
+
+                    <ImageView
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_alignParentTop="true"
+                        android:layout_centerHorizontal="true"
+                        android:layout_marginTop="10dp"
+                        android:padding="5dp"
+                        app:srcCompat="@drawable/indiaflag" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_centerHorizontal="true"
+                        android:fontFamily="@font/regular"
+                        android:gravity="center"
+                        android:text="सिक्किम"
+                        android:textColor="@color/black"
+                        android:textSize="16sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+            </LinearLayout>
+
         </LinearLayout>
     </LinearLayout>
 

@@ -6,7 +6,6 @@ import com.app.dentzadmin.data.network.RetrofitClientAndEndPoints
 import com.app.dentzadmin.util.NetworkState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import retrofit2.Response
 
 
 class MainRepository {
@@ -15,14 +14,7 @@ class MainRepository {
     /* API CALL To Get Response */
     suspend fun getResponse(ctx: Context): Flow<NetworkState<SampleResponse>> {
         try {
-            val sharedPreference = ctx.getSharedPreferences("LOGIN", Context.MODE_PRIVATE)
-            var response: Response<SampleResponse>? = null
-            val isLan = sharedPreference.getString("isLanguage", "en")
-            if (isLan.equals("en")) {
-                response = RetrofitClientAndEndPoints.getInstance(ctx).getResponseContent()
-            } else {
-                response = RetrofitClientAndEndPoints.getInstance(ctx).getResponseContentNepali()
-            }
+            var response = RetrofitClientAndEndPoints.getInstance(ctx).getResponseContent()
 
             return if (response.isSuccessful) {
                 val responseBody = response.body()

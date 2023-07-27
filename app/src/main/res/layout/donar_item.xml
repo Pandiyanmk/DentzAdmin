@@ -4,7 +4,7 @@
     android:id="@+id/fulllay"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="10sp"
+    android:layout_margin="5sp"
     app:cardElevation="9dp">
 
     <LinearLayout
@@ -24,7 +24,8 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="2sp"
                 android:text="Item"
-                android:textColor="@color/black"
+                android:fontFamily="@font/regular"
+                android:textColor="@color/grey"
                 android:textSize="16sp"
                 android:textStyle="normal" />
         </LinearLayout>

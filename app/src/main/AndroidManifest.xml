@@ -19,6 +19,9 @@
             android:name="com.app.dentzadmin.view.HomePage"
             android:exported="false"></activity>
         <activity
+            android:name="com.app.dentzadmin.view.UserHomePage"
+            android:exported="false"></activity>
+        <activity
             android:name="com.app.dentzadmin.view.ProfilePage"
             android:exported="false"></activity>
         <activity

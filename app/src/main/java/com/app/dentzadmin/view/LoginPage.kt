@@ -38,6 +38,31 @@ class LoginPage : AppCompatActivity() {
         val loginButton = findViewById<CircularProgressButton>(R.id.loginButton)
         val forgotpassword = findViewById<LinearLayout>(R.id.forgotpassword)
 
+        val india = findViewById<LinearLayout>(R.id.india)
+        val us = findViewById<LinearLayout>(R.id.us)
+
+        india.setOnClickListener {
+            val sharedPreference = getSharedPreferences("LOGIN", Context.MODE_PRIVATE)
+            var editor = sharedPreference.edit()
+            editor.putString("isLanguage", "hi")
+            editor.commit()
+            val moveToReset = Intent(this, GetStartedPage::class.java)
+            moveToReset.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            startActivity(moveToReset)
+            finish()
+        }
+
+        us.setOnClickListener {
+            val sharedPreference = getSharedPreferences("LOGIN", Context.MODE_PRIVATE)
+            var editor = sharedPreference.edit()
+            editor.putString("isLanguage", "en")
+            editor.commit()
+            val moveToReset = Intent(this, GetStartedPage::class.java)
+            moveToReset.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK)
+            startActivity(moveToReset)
+            finish()
+        }
+
         forgotpassword.setOnClickListener {
             val moveToReset = Intent(this, ForgotPage::class.java)
             moveToReset.putExtra("userId", userid.text.toString())
@@ -65,14 +90,23 @@ class LoginPage : AppCompatActivity() {
         }
 
         commonViewModel.responseContent.observe(this) { result ->
-            if (result.userId == userid.text.toString() && result.password == password.text.toString()) {
+            if (result.userId.contains(userid.text.toString()) && result.password.contains(password.text.toString())) {
                 val sharedPreference = getSharedPreferences("LOGIN", Context.MODE_PRIVATE)
                 var editor = sharedPreference.edit()
                 editor.putInt("isLoggedIn", 1)
-                editor.commit()
-                val moveToReset = Intent(this, HomePage::class.java)
-                startActivity(moveToReset)
-                finish()
+                if (userid.text.toString() == "user" && password.text.toString() == "user") {
+                    editor.putString("isLoggedInType", "user")
+                    editor.commit()
+                    val moveToReset = Intent(this, UserHomePage::class.java)
+                    startActivity(moveToReset)
+                    finish()
+                } else {
+                    editor.putString("isLoggedInType", "admin")
+                    editor.commit()
+                    val moveToReset = Intent(this, HomePage::class.java)
+                    startActivity(moveToReset)
+                    finish()
+                }
             } else {
                 cu.showAlert(getString(R.string.invalid_login_details), this)
             }

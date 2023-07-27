@@ -11,11 +11,8 @@ import retrofit2.http.GET
 interface RetrofitClientAndEndPoints {
 
 
-    @GET("0bbb2d169f73d2fa89de")
+    @GET("fac537afc54e53bb1d4b")
     suspend fun getResponseContent(): Response<SampleResponse>
-
-    @GET("227088b5f1b8045c1722")
-    suspend fun getResponseContentNepali(): Response<SampleResponse>
 
     /* Building Retrofit with Base URL */
     companion object {

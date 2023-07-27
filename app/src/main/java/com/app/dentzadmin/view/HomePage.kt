@@ -4,7 +4,6 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
-import android.speech.tts.TextToSpeech
 import android.view.View
 import android.view.animation.AccelerateInterpolator
 import android.view.animation.Animation
@@ -23,6 +22,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.app.dentzadmin.R
 import com.app.dentzadmin.data.model.Group
 import com.app.dentzadmin.data.model.Message
+import com.app.dentzadmin.data.model.MessageToFirebase
 import com.app.dentzadmin.data.model.Question
 import com.app.dentzadmin.data.model.SendData
 import com.app.dentzadmin.repository.MainRepository
@@ -40,11 +40,11 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.util.Util
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import nl.dionsegijn.konfetti.xml.KonfettiView
+import com.google.firebase.database.DatabaseReference
+import com.google.firebase.database.FirebaseDatabase
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 
@@ -58,9 +58,6 @@ class HomePage : AppCompatActivity() {
     private var groupList: RecyclerView? = null
     private var messageList: RecyclerView? = null
     private lateinit var aboutPageViewModel: CommonViewModel
-    var textToSpeech: TextToSpeech? = null
-    private var konfettiView: KonfettiView? = null
-    var speak: FloatingActionButton? = null
     private var timer: CountDownTimer? = null
     var groupListData: ArrayList<Group>? = null
     var messageListData: ArrayList<Message>? = null
@@ -88,6 +85,8 @@ class HomePage : AppCompatActivity() {
     var tracker: ProgressTracker? = null
 
     var audioExoPlayer: ExoPlayer? = null
+    var firebaseDatabase: FirebaseDatabase? = null
+    var databaseReference: DatabaseReference? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -95,6 +94,14 @@ class HomePage : AppCompatActivity() {
 
         /* Hiding ToolBar */
         supportActionBar?.hide()
+
+        // below line is used to get the
+        // instance of our FIrebase database.
+        firebaseDatabase = FirebaseDatabase.getInstance()
+
+        // below line is used to get reference for our database.
+        databaseReference = firebaseDatabase!!.getReference("MessageInfo");
+
 
         /* ViewModel Initialization */
         aboutPageViewModel = ViewModelProvider(
@@ -111,7 +118,6 @@ class HomePage : AppCompatActivity() {
         videoContent = findViewById(R.id.videoContent)
         audioContent = findViewById(R.id.audioContent)
         val profile = findViewById<ImageView>(R.id.profile)
-        konfettiView = findViewById(R.id.konfettiView)
         playerView = findViewById(R.id.playerView)
         loaderView = findViewById(R.id.loaderView)
         send = findViewById(R.id.send)
@@ -152,7 +158,9 @@ class HomePage : AppCompatActivity() {
                     SendData(message = messageSelected[0].content, groups = commaremovedGroup)
                 aboutPageViewModel.insertData(sendData, this)
 
-
+                val messageToFirebase =
+                    MessageToFirebase(messageSelected[0].content, messageSelected[0].questions)
+                addDatatoFirebase(messageToFirebase)
             }
         }
 
@@ -160,8 +168,6 @@ class HomePage : AppCompatActivity() {
             val moveToReset = Intent(this, ProfilePage::class.java)
             startActivity(moveToReset)
         }
-
-        speak = findViewById(R.id.speak)
 
         startFetch()
 
@@ -202,37 +208,6 @@ class HomePage : AppCompatActivity() {
             audioExoPlayer!!.seekTo(
                 audioExoPlayer!!.currentPosition + 10000
             )
-        }
-
-        speak!!.setOnClickListener {
-            if (!textToSpeech!!.isSpeaking) {
-                speak!!.setImageResource(R.drawable.stop)
-                textToSpeech?.speak(
-                    messagecontent!!.text.toString(), TextToSpeech.QUEUE_FLUSH, null
-                )
-                timer?.let {
-                    it.cancel()
-                    timer = null
-                }
-                timer = object : CountDownTimer(6000, 1000) {
-                    override fun onTick(millisUntilFinished: Long) {
-
-                    }
-
-                    override fun onFinish() {
-                        speak!!.setImageResource(R.drawable.speak)
-                        textToSpeech?.stop()
-                    }
-                }.start()
-
-            } else {
-                timer?.let {
-                    it.cancel()
-                    timer = null
-                }
-                speak!!.setImageResource(R.drawable.speak)
-                textToSpeech?.stop()
-            }
         }
 
         aboutPageViewModel.groupName.observe(this) { groupName ->
@@ -296,19 +271,9 @@ class HomePage : AppCompatActivity() {
         cu.showAlert(message, this)
     }
 
-    private fun textTpSpeech() {
-        textToSpeech = TextToSpeech(this) { status ->
-            if (status == TextToSpeech.SUCCESS) {
-                textToSpeech!!.language = Locale.ENGLISH
-            }
-        }
-    }
-
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: String?) {
-        if (event.equals("done")) {
-            konfettiView!!.start(Presets.explode())
-        } else if (event!!.startsWith("message")) {
+        if (event!!.startsWith("message")) {
             val splitValue = event!!.split(",")
 
             val postion = splitValue[1].toInt()
@@ -381,10 +346,6 @@ class HomePage : AppCompatActivity() {
     override fun onStop() {
         super.onStop()
         EventBus.getDefault().unregister(this)
-        textToSpeech?.let {
-            it.stop()
-            speak!!.setImageResource(R.drawable.speak)
-        }
         audioExoPlayer?.let {
             if (audioExoPlayer!!.isPlaying) {
                 play!!.setImageResource(R.drawable.ic_play)
@@ -409,9 +370,6 @@ class HomePage : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-        textToSpeech?.let {
-            it.shutdown()
-        }
         audioExoPlayer?.let {
             it.stop()
             it.release()
@@ -423,8 +381,6 @@ class HomePage : AppCompatActivity() {
             "text" -> {
                 stopAudio()
                 stopVideoPlayer()
-                textTpSpeech()
-                speak!!.visibility = View.VISIBLE
                 textContent!!.visibility = View.VISIBLE
                 videoContent!!.visibility = View.GONE
                 audioContent!!.visibility = View.GONE
@@ -603,5 +559,9 @@ class HomePage : AppCompatActivity() {
             groupListData!![i] = mData
         }
         groupAdapter.notifyDataSetChanged()
+    }
+
+    private fun addDatatoFirebase(messageToFirebase: MessageToFirebase) {
+        databaseReference!!.setValue(messageToFirebase)
     }
 }
