@@ -29,4 +29,9 @@
     <string name="push">धक्का</string>
     <string name="please_select_group">कृपया समूह चयन गर्नुहोस्</string>
     <string name="sent">पठाइयो</string>
+    <string name="my_profile">मेरो प्रोफाइल</string>
+    <string name="view_reports">रिपोर्टहरू हेर्नुहोस्</string>
+    <string name="message_sent_by_admin_to_groups">व्यवस्थापक द्वारा समूहहरूमा सन्देश पठाइएको</string>
+    <string name="message">सन्देश:</string>
+    <string name="message_sent_to_group">समूहमा सन्देश पठाइयो:</string>
 </resources>

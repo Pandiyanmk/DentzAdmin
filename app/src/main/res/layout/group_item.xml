@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:orientation="horizontal"
-        android:padding="2dp">
+        >
 
         <CheckBox
             android:id="@+id/checkBox"

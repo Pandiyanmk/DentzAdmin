@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.app.dentzadmin.data.model.MessageSentFromAdminToGroup
 import com.app.dentzadmin.data.model.SampleResponse
 import com.app.dentzadmin.data.model.SendData
 import com.app.dentzadmin.dataBase.AppDatabase
@@ -30,14 +31,22 @@ class CommonViewModel constructor(private val authCheckRepository: MainRepositor
 
     private val _errorMessage = MutableLiveData<String>()
     private val _inserted = MutableLiveData<String>()
+    private val _sentFromAdmin = MutableLiveData<MessageSentFromAdminToGroup>()
     private val _groupName = MutableLiveData<String>()
     val errorMessage: LiveData<String>
         get() = _errorMessage
     val inserted: LiveData<String>
         get() = _inserted
 
+    val sentFromAdmin: LiveData<MessageSentFromAdminToGroup>
+        get() = _sentFromAdmin
+
     val groupName: LiveData<String>
         get() = _groupName
+
+    val _isInserted = MutableLiveData<Boolean>(false)
+    val isInserted: LiveData<Boolean>
+        get() = _isInserted
 
     /* Get Content From Api */
     fun getResponseContent(ctx: Context) {
@@ -63,14 +72,41 @@ class CommonViewModel constructor(private val authCheckRepository: MainRepositor
             withContext(Dispatchers.IO) {
                 var dataSource = AppDatabase.getDatabase(ctx).dataSourceDao()
                 val messageList = dataSource.getData(sendData.message)
+                var sentToServerGroups = sendData.groups
                 if (messageList.isEmpty()) {
                     dataSource.insertData(sendData)
                 } else {
                     val data = dataSource.getMessageData(sendData.message)
                     val getAddGroups = data.groups + "," + sendData.groups
                     dataSource.updateGroup(sendData.message, getAddGroups)
+                    sentToServerGroups = getAddGroups
                 }
                 _inserted.postValue(sendData.message)
+                val messageSentFromAdminToGroup = MessageSentFromAdminToGroup(
+                    content = sendData.message, groups = sentToServerGroups
+                )
+                _sentFromAdmin.postValue(messageSentFromAdminToGroup)
+            }
+        }
+    }
+
+    fun insertDataFromFirebase(sendData: SendData, ctx: Context, size: Int) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                var dataSource = AppDatabase.getDatabase(ctx).dataSourceDao()
+                dataSource.insertData(sendData)
+                if (size == dataSource.getAllData().size) {
+                    _isInserted.postValue(true)
+                }
+            }
+        }
+    }
+
+    fun deletTable(ctx: Context) {
+        viewModelScope.launch {
+            withContext(Dispatchers.IO) {
+                var dataSource = AppDatabase.getDatabase(ctx).dataSourceDao()
+                dataSource.nukeTable()
             }
         }
     }

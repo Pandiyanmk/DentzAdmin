@@ -17,11 +17,13 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.app.dentzadmin.R
 import com.app.dentzadmin.data.model.Group
 import com.app.dentzadmin.data.model.Message
+import com.app.dentzadmin.data.model.MessageSentFromAdminToGroup
 import com.app.dentzadmin.data.model.MessageToFirebase
 import com.app.dentzadmin.data.model.Question
 import com.app.dentzadmin.data.model.SendData
@@ -30,6 +32,7 @@ import com.app.dentzadmin.util.CommonUtil
 import com.app.dentzadmin.view.HomePage.ProgressTracker.PositionListener
 import com.app.dentzadmin.viewModel.CommonViewModel
 import com.app.dentzadmin.viewModel.CommonViewModelFactory
+import com.firepush.Fire
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
@@ -40,8 +43,11 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.util.Util
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -62,11 +68,11 @@ class HomePage : AppCompatActivity() {
     var groupListData: ArrayList<Group>? = null
     var messageListData: ArrayList<Message>? = null
     private var play: FloatingActionButton? = null
-    private var next: FloatingActionButton? = null
     private var prev: FloatingActionButton? = null
     private var replay: FloatingActionButton? = null
     private var forward: FloatingActionButton? = null
     private var send: FloatingActionButton? = null
+    private var choosoptions: TextView? = null
 
     private var textContent: LinearLayout? = null
     private var loaderView: RelativeLayout? = null
@@ -87,6 +93,7 @@ class HomePage : AppCompatActivity() {
     var audioExoPlayer: ExoPlayer? = null
     var firebaseDatabase: FirebaseDatabase? = null
     var databaseReference: DatabaseReference? = null
+    var tokenToSend: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -98,10 +105,6 @@ class HomePage : AppCompatActivity() {
         // below line is used to get the
         // instance of our FIrebase database.
         firebaseDatabase = FirebaseDatabase.getInstance()
-
-        // below line is used to get reference for our database.
-        databaseReference = firebaseDatabase!!.getReference("MessageInfo");
-
 
         /* ViewModel Initialization */
         aboutPageViewModel = ViewModelProvider(
@@ -124,10 +127,9 @@ class HomePage : AppCompatActivity() {
 
         val choosemessage = findViewById<TextView>(R.id.choosemessage)
         val choosegroup = findViewById<TextView>(R.id.choosegroup)
-        val choosoptions = findViewById<TextView>(R.id.choosoptions)
+        choosoptions = findViewById<TextView>(R.id.choosoptions)
 
         play = findViewById(R.id.playBtn)
-        next = findViewById(R.id.nextBtn)
         prev = findViewById(R.id.prevBtn)
         replay = findViewById(R.id.replayBtn)
         forward = findViewById(R.id.forBtn)
@@ -177,9 +179,23 @@ class HomePage : AppCompatActivity() {
 
         }
 
+        aboutPageViewModel.sentFromAdmin.observe(this) { messageSentFromAdmin ->
+            var messagePostion = getPositionOfMessage(content = messageSentFromAdmin.content)
+            if (messagePostion != 0) {
+                val pathReference = firebaseDatabase!!.reference.child("AdminSentMessages")
+                pathReference.child("" + messagePostion).setValue(messageSentFromAdmin)
+                    .addOnCompleteListener { }
+                sendPush(tokenToSend, messageSentFromAdmin.content)
+            }
+        }
+
         aboutPageViewModel.inserted.observe(this) { message ->
             resetAllGroupData()
             setgroupData(message)
+        }
+
+        aboutPageViewModel.isInserted.observe(this) { message ->
+            aboutPageViewModel.getResponseContent(this@HomePage)
         }
 
         play!!.setOnClickListener {
@@ -224,12 +240,12 @@ class HomePage : AppCompatActivity() {
             loading!!.visibility = View.GONE
             choosemessage!!.visibility = View.VISIBLE
             choosegroup!!.visibility = View.VISIBLE
-            choosoptions!!.visibility = View.VISIBLE
+
 
             maxSelect = result.maxselect
             groupListData = result.group
-            groupList!!.layoutManager =
-                LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+            val layoutManager = GridLayoutManager(this, 2)
+            groupList!!.layoutManager = layoutManager
 
 
             messageListData = result.message
@@ -260,7 +276,8 @@ class HomePage : AppCompatActivity() {
 
     private fun startFetch() {
         if (cu.isNetworkAvailable(this)) {
-            aboutPageViewModel.getResponseContent(this)
+            getUserFcmId()
+            getAdminSentMessage()
         } else {
             displayMessageInAlert(getString(R.string.no_internet))
             loading!!.visibility = View.GONE
@@ -539,6 +556,11 @@ class HomePage : AppCompatActivity() {
     }
 
     fun questionListData(questions: ArrayList<Question>) {
+        if (questions.size > 0) {
+            choosoptions!!.visibility = View.VISIBLE
+        } else {
+            choosoptions!!.visibility = View.GONE
+        }
         donarList!!.layoutManager = LinearLayoutManager(this)
         val adapter = DonarAdapter(this, questions)
         donarList!!.adapter = adapter
@@ -562,6 +584,66 @@ class HomePage : AppCompatActivity() {
     }
 
     private fun addDatatoFirebase(messageToFirebase: MessageToFirebase) {
+        databaseReference = firebaseDatabase!!.getReference("MessageInfo")
         databaseReference!!.setValue(messageToFirebase)
+    }
+
+    fun getPositionOfMessage(content: String): Int {
+        for (i in 0 until messageListData!!.size) {
+            if (messageListData!![i].content == content) {
+                return (i + 1)
+            }
+        }
+        return 0
+    }
+
+    private fun getAdminSentMessage() {
+        val pathReference = firebaseDatabase!!.reference.child("AdminSentMessages")
+        val postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                aboutPageViewModel.deletTable(this@HomePage)
+                for (templateSnapshot in dataSnapshot.children) {
+                    val post = templateSnapshot.getValue(MessageSentFromAdminToGroup::class.java)
+                    post?.let {
+                        val sd = SendData(message = it.content, groups = it.groups)
+                        aboutPageViewModel.insertDataFromFirebase(
+                            sd, this@HomePage, dataSnapshot.children.toList().size
+                        )
+                    }
+                }
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+                aboutPageViewModel.getResponseContent(this@HomePage)
+            }
+        }
+        pathReference.addListenerForSingleValueEvent(postListener)
+    }
+
+    private fun getUserFcmId() {
+        val pathReference = firebaseDatabase!!.reference.child("FCMToken")
+        val postListener = object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                tokenToSend = dataSnapshot.value.toString()
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {
+            }
+        }
+        pathReference.addListenerForSingleValueEvent(postListener)
+    }
+
+    fun sendPush(token: String, content: String) {
+        var message = content
+        if (content.endsWith(".mp3") || content.endsWith(".mp4")) {
+            message = "You have received a new message"
+        }
+        if (token.isNotEmpty()) {
+            Fire.init("AAAAkvLlvLo:APA91bHjjuBc68BaVIbBhKzfGRv3ZtX1tMzUq68u_wxg21PBbZPtzdI-I7-Y3pr7CBorCbu4JTvk3e7o34qtXA7nJAqzxpgFV_Q4TPI237IBkb7d7oOmSb1HWtI1xjTC1YZD2UXSpQ8v")
+            Fire.create().setTitle("Dentz Admin Message").setBody(message)
+                .setCallback { pushCallback, exception ->
+                    //get response here
+                }.toIds(token).push()
+        }
     }
 }

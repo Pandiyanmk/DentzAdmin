@@ -5,6 +5,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="5sp"
+    android:background="@drawable/questionscurvedcorner"
+    android:padding="10sp"
     app:cardElevation="9dp">
 
     <LinearLayout
@@ -23,11 +25,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="2sp"
-                android:text="Item"
                 android:fontFamily="@font/regular"
+                android:text="Item"
                 android:textColor="@color/grey"
-                android:textSize="16sp"
-                android:textStyle="normal" />
+                android:textSize="16sp" />
         </LinearLayout>
 
     </LinearLayout>

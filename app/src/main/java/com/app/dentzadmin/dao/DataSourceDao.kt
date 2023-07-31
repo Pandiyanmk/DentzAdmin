@@ -13,6 +13,9 @@ interface DataSourceDao {
     @Query("SELECT * FROM send_data WHERE message =:message")
     fun getData(message: String): List<SendData>
 
+    @Query("SELECT * FROM send_data")
+    fun getAllData(): List<SendData>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertData(dataSources: SendData)
 
@@ -21,6 +24,9 @@ interface DataSourceDao {
 
     @Update
     fun updateData(tour: SendData?): Int
+
+    @Query("DELETE FROM send_data")
+    fun nukeTable()
 
     suspend fun updateGroup(message: String, groupName: String) {
         val ds: SendData = getMessageData(message)

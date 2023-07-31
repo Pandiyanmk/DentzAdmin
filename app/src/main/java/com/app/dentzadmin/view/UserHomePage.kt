@@ -216,9 +216,17 @@ class UserHomePage : AppCompatActivity() {
                 val post = dataSnapshot.getValue(MessageToFirebaseRead::class.java)
                 println("post.content" + post!!.content)
                 post!!.content?.let {
-                    updateContent(
-                        it, post!!.questions as ArrayList<QuestionRead>
-                    )
+                    if (post!!.questions!!.isEmpty()) {
+                        val emptyArrayList = ArrayList<QuestionRead>()
+                        updateContent(
+                            it, emptyArrayList
+                        )
+                    } else {
+                        updateContent(
+                            it, post!!.questions as ArrayList<QuestionRead>
+                        )
+                    }
+
                 }
             }
 
@@ -231,7 +239,7 @@ class UserHomePage : AppCompatActivity() {
 
     private fun startFetch() {
         if (cu.isNetworkAvailable(this)) {
-
+            updateFCMIdToServer()
         } else {
             displayMessageInAlert(getString(R.string.no_internet))
             loading!!.visibility = View.GONE
@@ -382,5 +390,19 @@ class UserHomePage : AppCompatActivity() {
         donarList!!.layoutManager = LinearLayoutManager(this)
         val adapter = QuestionAdapter(this, questionArray, content)
         donarList!!.adapter = adapter
+    }
+
+    private fun updateFCMIdToServer() {
+        val sharedPreference = getSharedPreferences("FCMID", Context.MODE_PRIVATE)
+        val isFcmSent = sharedPreference.getInt("isFcmSent", 0)
+        val fcmToken = sharedPreference.getString("Token", "")
+        if (isFcmSent == 0 && fcmToken!!.isNotEmpty()) {
+            var editor = sharedPreference.edit()
+            editor.putInt("isFcmSent", 1)
+            editor.commit()
+            val databaseReference = firebaseDatabase!!.getReference("FCMToken")
+            databaseReference.setValue(fcmToken)
+        }
+
     }
 }

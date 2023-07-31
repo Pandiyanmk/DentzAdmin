@@ -16,6 +16,7 @@ interface RetrofitClientAndEndPoints {
 
     /* Building Retrofit with Base URL */
     companion object {
+
         private var retrofitService: RetrofitClientAndEndPoints? = null
         fun getInstance(ctx: Context): RetrofitClientAndEndPoints {
             if (retrofitService == null) {
