@@ -23,8 +23,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.app.dentzadmin.R
 import com.app.dentzadmin.data.model.Group
 import com.app.dentzadmin.data.model.Message
-import com.app.dentzadmin.data.model.MessageSentFromAdminToGroup
-import com.app.dentzadmin.data.model.MessageToFirebase
 import com.app.dentzadmin.data.model.Question
 import com.app.dentzadmin.data.model.SendData
 import com.app.dentzadmin.repository.MainRepository
@@ -32,7 +30,6 @@ import com.app.dentzadmin.util.CommonUtil
 import com.app.dentzadmin.view.HomePage.ProgressTracker.PositionListener
 import com.app.dentzadmin.viewModel.CommonViewModel
 import com.app.dentzadmin.viewModel.CommonViewModelFactory
-import com.firepush.Fire
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.Player
@@ -43,11 +40,8 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.util.Util
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import org.greenrobot.eventbus.ThreadMode
@@ -57,7 +51,7 @@ import java.util.concurrent.TimeUnit
 class HomePage : AppCompatActivity() {
     private val cu = CommonUtil()
     var isStart = false
-    var maxSelect = 1
+    var maxSelect = 5
     var isHasVideoUrl = ""
     private var loading: ProgressBar? = null
     private var donarList: RecyclerView? = null
@@ -66,6 +60,7 @@ class HomePage : AppCompatActivity() {
     private lateinit var aboutPageViewModel: CommonViewModel
     private var timer: CountDownTimer? = null
     var groupListData: ArrayList<Group>? = null
+    var questionsListData: ArrayList<Question>? = null
     var messageListData: ArrayList<Message>? = null
     private var play: FloatingActionButton? = null
     private var prev: FloatingActionButton? = null
@@ -145,7 +140,7 @@ class HomePage : AppCompatActivity() {
             } else {
                 val groupBuilder = StringBuilder()
                 for (i in 0 until getCount!!.size) {
-                    groupBuilder.append(getCount!![i].name + ",")
+                    groupBuilder.append(getCount!![i].id + ",")
                 }
                 var commaremovedGroup = ""
                 if (groupBuilder.toString().endsWith(",")) {
@@ -156,13 +151,15 @@ class HomePage : AppCompatActivity() {
 
                 Toast.makeText(this, getString(R.string.sent), Toast.LENGTH_SHORT).show()
 
-                val sendData =
-                    SendData(message = messageSelected[0].content, groups = commaremovedGroup)
+                val sendData = SendData(
+                    messageid = messageSelected[0].id, groupid = commaremovedGroup
+                )
                 aboutPageViewModel.insertData(sendData, this)
 
-                val messageToFirebase =
-                    MessageToFirebase(messageSelected[0].content, messageSelected[0].questions)
-                addDatatoFirebase(messageToFirebase)
+                /*val messageToFirebase = MessageToFirebase(
+                    messageSelected[0].contentEnglish, messageSelected[0].questions
+                )
+                addDatatoFirebase(messageToFirebase)*/
             }
         }
 
@@ -180,13 +177,9 @@ class HomePage : AppCompatActivity() {
         }
 
         aboutPageViewModel.sentFromAdmin.observe(this) { messageSentFromAdmin ->
-            var messagePostion = getPositionOfMessage(content = messageSentFromAdmin.content)
-            if (messagePostion != 0) {
-                val pathReference = firebaseDatabase!!.reference.child("AdminSentMessages")
-                pathReference.child("" + messagePostion).setValue(messageSentFromAdmin)
-                    .addOnCompleteListener { }
-                sendPush(tokenToSend, messageSentFromAdmin.content)
-            }
+            aboutPageViewModel.adminSentMessage(
+                this, messageSentFromAdmin.content, messageSentFromAdmin.groups
+            )
         }
 
         aboutPageViewModel.inserted.observe(this) { message ->
@@ -195,7 +188,9 @@ class HomePage : AppCompatActivity() {
         }
 
         aboutPageViewModel.isInserted.observe(this) { message ->
-            aboutPageViewModel.getResponseContent(this@HomePage)
+            if (message) {
+                aboutPageViewModel.getMessagesandGroups(this)
+            }
         }
 
         play!!.setOnClickListener {
@@ -226,49 +221,89 @@ class HomePage : AppCompatActivity() {
             )
         }
 
-        aboutPageViewModel.groupName.observe(this) { groupName ->
-            for (i in 0 until groupListData!!.size) {
-                if (groupName.contains(groupListData!![i].name)) {
-                    val mData = Group(groupListData!![i].name, 2)
-                    groupListData!![i] = mData
-                }
+        aboutPageViewModel.adminSentMessage.observe(this) { sentMessage ->
+            aboutPageViewModel.deletTable(this@HomePage)
+            if (sentMessage.data.size == 0) {
+                aboutPageViewModel.getMessagesandGroups(this)
             }
-            groupData(groupName)
+            for (i in 0 until sentMessage.data.size) {
+                Thread.sleep(100)
+                var gropupId: String = sentMessage.data[i].groupid
+                var messageSent = sentMessage.data[i].messageid
+                val sd = SendData(
+                    messageid = messageSent, groupid = gropupId
+                )
+                aboutPageViewModel.insertDataFromFirebase(
+                    sd, this@HomePage, sentMessage.data.size
+                )
+            }
         }
 
-        aboutPageViewModel.responseContent.observe(this) { result ->
+
+        aboutPageViewModel.groupName.observe(this) { groupName ->
+            if (groupName.isNotEmpty()) {
+                val groupSplitArray = groupName.split(",").toTypedArray()
+                for (i in 0 until groupSplitArray!!.size) {
+                    val groupItem = groupListData!!.filter { it.id == groupSplitArray[i] }
+                    val indexPostion = groupListData!!.indexOf(groupItem[0])
+                    val mData = Group(groupItem!![0].id, groupItem!![0].name, 2)
+                    groupListData!![indexPostion] = mData
+                }
+            }
+            groupData()
+        }
+
+        aboutPageViewModel.groupMessageContent.observe(this) { result ->
             loading!!.visibility = View.GONE
             choosemessage!!.visibility = View.VISIBLE
             choosegroup!!.visibility = View.VISIBLE
 
 
-            maxSelect = result.maxselect
             groupListData = result.group
             val layoutManager = GridLayoutManager(this, 2)
             groupList!!.layoutManager = layoutManager
 
-
+            questionsListData = result.questions
             messageListData = result.message
             messageList!!.layoutManager =
                 LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
             messageAdapter = MessageAdapter(this, messageListData!!)
             messageList!!.adapter = messageAdapter
 
-            val mData = Message(messageListData!![0].content, 1, messageListData!![0].questions)
+            val mData = Message(
+                messageListData!![0].contentEnglish,
+                messageListData!![0].contentNepali,
+                1,
+                messageListData!![0].id,
+                messageListData!![0].questionsidEnglish,
+                messageListData!![0].questionsidNepali
+            )
             messageListData!![0] = mData
             messageAdapter.notifyDataSetChanged()
 
-            questionListData(messageListData!![0].questions)
+            val filteredQuestionList = ArrayList<Question>()
+            filteredQuestionList.clear()
+            if (messageListData!![0].questionsidEnglish.isNotEmpty()) {
+                val strs = messageListData!![0].questionsidEnglish.split(",").toTypedArray()
+                for (element in strs) {
+                    val filter = result.questions.filter { it.id == element }
+                    val questionsData = filter[0]
+                    filteredQuestionList.add(questionsData)
+                }
+                if (filteredQuestionList.isNotEmpty()) {
+                    questionListData(filteredQuestionList)
+                }
+            }
 
-            setgroupData(messageListData!![0].content)
+            setgroupData(messageListData!![0].id)
 
             if (messageListData!!.size > 0) {
-                if (messageListData!![0].content.endsWith("mp3")) {
-                    setContent("audio", messageListData!![0].content)
-                } else if (messageListData!![0].content.endsWith("mp4")) {
-                    setContent("video", messageListData!![0].content)
+                if (messageListData!![0].contentEnglish.endsWith("mp3")) {
+                    setContent("audio", messageListData!![0].contentEnglish)
+                } else if (messageListData!![0].contentEnglish.endsWith("mp4")) {
+                    setContent("video", messageListData!![0].contentEnglish)
                 } else {
-                    setContent("text", messageListData!![0].content)
+                    setContent("text", messageListData!![0].contentEnglish)
                 }
             }
         }
@@ -276,8 +311,8 @@ class HomePage : AppCompatActivity() {
 
     private fun startFetch() {
         if (cu.isNetworkAvailable(this)) {
-            getUserFcmId()
             getAdminSentMessage()
+            //getUserFcmId()
         } else {
             displayMessageInAlert(getString(R.string.no_internet))
             loading!!.visibility = View.GONE
@@ -295,28 +330,56 @@ class HomePage : AppCompatActivity() {
 
             val postion = splitValue[1].toInt()
             for (i in 0 until messageListData!!.size) {
-                val mData = Message(messageListData!![i].content, 0, messageListData!![i].questions)
+                val mData = Message(
+                    messageListData!![i].contentEnglish,
+                    messageListData!![i].contentNepali,
+                    0,
+                    messageListData!![i].id,
+                    messageListData!![i].questionsidEnglish,
+                    messageListData!![i].questionsidNepali
+                )
                 messageListData!![i] = mData
             }
-            val mData =
-                Message(messageListData!![postion].content, 1, messageListData!![postion].questions)
+            val mData = Message(
+                messageListData!![postion].contentEnglish,
+                messageListData!![postion].contentNepali,
+                1,
+                messageListData!![postion].id,
+                messageListData!![postion].questionsidEnglish,
+                messageListData!![postion].questionsidNepali
+            )
             messageListData!![postion] = mData
             messageAdapter.notifyDataSetChanged()
 
-            questionListData(messageListData!![postion].questions)
 
-            if (messageListData!![postion].content.endsWith("mp3")) {
-                setContent("audio", messageListData!![postion].content)
-            } else if (messageListData!![postion].content.endsWith("mp4")) {
-                setContent("video", messageListData!![postion].content)
+            val filteredQuestionList = ArrayList<Question>()
+            filteredQuestionList.clear()
+            if (messageListData!![postion].questionsidEnglish.isNotEmpty()) {
+                val strs = messageListData!![postion].questionsidEnglish.split(",").toTypedArray()
+                for (element in strs) {
+                    val filter = questionsListData!!.filter { it.id == element }
+                    val questionsData = filter[0]
+                    filteredQuestionList.add(questionsData)
+                }
+            }
+            questionListData(filteredQuestionList)
+
+            if (messageListData!![postion].contentEnglish.endsWith("mp3")) {
+                setContent("audio", messageListData!![postion].contentEnglish)
+            } else if (messageListData!![postion].contentEnglish.endsWith("mp4")) {
+                setContent("video", messageListData!![postion].contentEnglish)
             } else {
-                setContent("text", messageListData!![postion].content)
+                setContent("text", messageListData!![postion].contentEnglish)
             }
             resetAllGroupData()
-            setgroupData(messageListData!![postion].content)
+            setgroupData(messageListData!![postion].id)
         } else {
             val splitValue = event!!.split(",")
-            val gData = Group(groupListData!![splitValue[0].toInt()].name, splitValue[1].toInt())
+            val gData = Group(
+                groupListData!![splitValue[0].toInt()].id,
+                groupListData!![splitValue[0].toInt()].name,
+                splitValue[1].toInt()
+            )
             groupListData!![splitValue[0].toInt()] = gData
             groupAdapter.notifyDataSetChanged()
         }
@@ -566,8 +629,8 @@ class HomePage : AppCompatActivity() {
         donarList!!.adapter = adapter
     }
 
-    private fun groupData(groupName: String) {
-        groupAdapter = GroupAdapter(this, groupListData!!, maxSelect, groupName)
+    private fun groupData() {
+        groupAdapter = GroupAdapter(this, groupListData!!, maxSelect)
         groupList!!.adapter = groupAdapter
     }
 
@@ -577,73 +640,13 @@ class HomePage : AppCompatActivity() {
 
     private fun resetAllGroupData() {
         for (i in 0 until groupListData!!.size) {
-            val mData = Group(groupListData!![i].name, 0)
+            val mData = Group(groupListData!![i].id, groupListData!![i].name, 0)
             groupListData!![i] = mData
         }
         groupAdapter.notifyDataSetChanged()
     }
 
-    private fun addDatatoFirebase(messageToFirebase: MessageToFirebase) {
-        databaseReference = firebaseDatabase!!.getReference("MessageInfo")
-        databaseReference!!.setValue(messageToFirebase)
-    }
-
-    fun getPositionOfMessage(content: String): Int {
-        for (i in 0 until messageListData!!.size) {
-            if (messageListData!![i].content == content) {
-                return (i + 1)
-            }
-        }
-        return 0
-    }
-
     private fun getAdminSentMessage() {
-        val pathReference = firebaseDatabase!!.reference.child("AdminSentMessages")
-        val postListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                aboutPageViewModel.deletTable(this@HomePage)
-                for (templateSnapshot in dataSnapshot.children) {
-                    val post = templateSnapshot.getValue(MessageSentFromAdminToGroup::class.java)
-                    post?.let {
-                        val sd = SendData(message = it.content, groups = it.groups)
-                        aboutPageViewModel.insertDataFromFirebase(
-                            sd, this@HomePage, dataSnapshot.children.toList().size
-                        )
-                    }
-                }
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-                aboutPageViewModel.getResponseContent(this@HomePage)
-            }
-        }
-        pathReference.addListenerForSingleValueEvent(postListener)
-    }
-
-    private fun getUserFcmId() {
-        val pathReference = firebaseDatabase!!.reference.child("FCMToken")
-        val postListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                tokenToSend = dataSnapshot.value.toString()
-            }
-
-            override fun onCancelled(databaseError: DatabaseError) {
-            }
-        }
-        pathReference.addListenerForSingleValueEvent(postListener)
-    }
-
-    fun sendPush(token: String, content: String) {
-        var message = content
-        if (content.endsWith(".mp3") || content.endsWith(".mp4")) {
-            message = "You have received a new message"
-        }
-        if (token.isNotEmpty()) {
-            Fire.init("AAAAkvLlvLo:APA91bHjjuBc68BaVIbBhKzfGRv3ZtX1tMzUq68u_wxg21PBbZPtzdI-I7-Y3pr7CBorCbu4JTvk3e7o34qtXA7nJAqzxpgFV_Q4TPI237IBkb7d7oOmSb1HWtI1xjTC1YZD2UXSpQ8v")
-            Fire.create().setTitle("Dentz Admin Message").setBody(message)
-                .setCallback { pushCallback, exception ->
-                    //get response here
-                }.toIds(token).push()
-        }
+        aboutPageViewModel.getAdminSentMessage(this)
     }
 }

@@ -34,4 +34,6 @@
     <string name="message_sent_by_admin_to_groups">व्यवस्थापक द्वारा समूहहरूमा सन्देश पठाइएको</string>
     <string name="message">सन्देश:</string>
     <string name="message_sent_to_group">समूहमा सन्देश पठाइयो:</string>
+    <string name="invalid_user_id">अवैध प्रयोगकर्ता आईडी</string>
+    <string name="no_data_available">कुनै डाटा उपलब्ध छैन</string>
 </resources>

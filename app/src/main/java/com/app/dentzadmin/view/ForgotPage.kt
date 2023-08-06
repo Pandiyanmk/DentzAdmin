@@ -47,7 +47,7 @@ class ForgotPage : AppCompatActivity() {
             } else {
                 sent.visibility = View.GONE
                 loginButton.startAnimation()
-                startFetch()
+                startFetch(userid.text.toString())
             }
         }
         userid.requestFocus()
@@ -58,10 +58,14 @@ class ForgotPage : AppCompatActivity() {
         commonViewModel.errorMessage.observe(this) { errorMessage ->
             cu.showAlert(errorMessage, this)
             loginButton.revertAnimation()
-
         }
 
         commonViewModel.responseContent.observe(this) { result ->
+            if (result.data.isEmpty()) {
+                sent.text = getString(R.string.invalid_user_id)
+            } else {
+                sent.text = getString(R.string.password_is_sent_to_the_registered_mobile_number)
+            }
             this.currentFocus?.let { view ->
                 val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
                 imm?.hideSoftInputFromWindow(view.windowToken, 0)
@@ -71,9 +75,9 @@ class ForgotPage : AppCompatActivity() {
         }
     }
 
-    private fun startFetch() {
+    private fun startFetch(userId: String) {
         if (cu.isNetworkAvailable(this)) {
-            commonViewModel.getResponseContent(this)
+            commonViewModel.getForgotPasswordResponse(this, userId)
         } else {
             displayMessageInAlert(getString(R.string.no_internet).toUpperCase())
         }

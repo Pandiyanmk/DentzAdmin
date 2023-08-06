@@ -5,7 +5,6 @@ import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
-import android.os.CountDownTimer
 import android.speech.tts.TextToSpeech
 import android.view.View
 import android.view.animation.AccelerateInterpolator
@@ -17,12 +16,15 @@ import android.widget.ProgressBar
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.app.dentzadmin.R
-import com.app.dentzadmin.data.model.MessageToFirebaseRead
 import com.app.dentzadmin.data.model.QuestionRead
+import com.app.dentzadmin.repository.MainRepository
 import com.app.dentzadmin.util.CommonUtil
+import com.app.dentzadmin.viewModel.CommonViewModel
+import com.app.dentzadmin.viewModel.CommonViewModelFactory
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.DefaultMediaSourceFactory
@@ -32,11 +34,8 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.util.Util
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.DatabaseReference
 import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
 import nl.dionsegijn.konfetti.xml.KonfettiView
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -53,9 +52,8 @@ class UserHomePage : AppCompatActivity() {
     var textToSpeech: TextToSpeech? = null
     private var konfettiView: KonfettiView? = null
     var speak: FloatingActionButton? = null
-    private var timer: CountDownTimer? = null
 
-
+    private lateinit var aboutPageViewModel: CommonViewModel
     private var play: FloatingActionButton? = null
     private var next: FloatingActionButton? = null
     private var prev: FloatingActionButton? = null
@@ -73,9 +71,6 @@ class UserHomePage : AppCompatActivity() {
     private lateinit var simpleExoPlayer: ExoPlayer
     lateinit var playerView: StyledPlayerView
 
-    var firebaseDatabase: FirebaseDatabase? = null
-    var databaseReference: DatabaseReference? = null
-
     var textContent: LinearLayout? = null
     var videoContent: LinearLayout? = null
     var audioContent: LinearLayout? = null
@@ -88,12 +83,10 @@ class UserHomePage : AppCompatActivity() {
         /* Hiding ToolBar */
         supportActionBar?.hide()
 
-        // below line is used to get the
-        // instance of our FIrebase database.
-        firebaseDatabase = FirebaseDatabase.getInstance()
-
-        // below line is used to get reference for our database.
-        databaseReference = firebaseDatabase!!.getReference("MessageInfo")
+        /* ViewModel Initialization */
+        aboutPageViewModel = ViewModelProvider(
+            this, CommonViewModelFactory(MainRepository())
+        )[CommonViewModel::class.java]
 
         /* SetUp Views */
         loading = findViewById(R.id.loading)
@@ -156,30 +149,12 @@ class UserHomePage : AppCompatActivity() {
 
         speak!!.setOnClickListener {
             if (!textToSpeech!!.isSpeaking) {
-                speak!!.setImageResource(R.drawable.stop)
+                speak!!.setImageResource(R.drawable.speak)
                 textToSpeech?.speak(
                     messagecontent!!.text.toString(), TextToSpeech.QUEUE_FLUSH, null
                 )
-                timer?.let {
-                    it.cancel()
-                    timer = null
-                }
-                timer = object : CountDownTimer(6000, 1000) {
-                    override fun onTick(millisUntilFinished: Long) {
-
-                    }
-
-                    override fun onFinish() {
-                        speak!!.setImageResource(R.drawable.speak)
-                        textToSpeech?.stop()
-                    }
-                }.start()
 
             } else {
-                timer?.let {
-                    it.cancel()
-                    timer = null
-                }
                 speak!!.setImageResource(R.drawable.speak)
                 textToSpeech?.stop()
             }
@@ -211,35 +186,56 @@ class UserHomePage : AppCompatActivity() {
             }
         }
 
-        val postListener = object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                val post = dataSnapshot.getValue(MessageToFirebaseRead::class.java)
-                println("post.content" + post!!.content)
-                post!!.content?.let {
-                    if (post!!.questions!!.isEmpty()) {
-                        val emptyArrayList = ArrayList<QuestionRead>()
-                        updateContent(
-                            it, emptyArrayList
-                        )
-                    } else {
-                        updateContent(
-                            it, post!!.questions as ArrayList<QuestionRead>
-                        )
-                    }
+        aboutPageViewModel.errorMessage.observe(this) { errorMessage ->
+            cu.showAlert(errorMessage, this)
+            loading!!.visibility = View.GONE
 
+        }
+
+        aboutPageViewModel.userGroupMessageContent.observe(this) { userMesssages ->
+            if (userMesssages.messageid.size > 0) {
+                val sharedPreference = getSharedPreferences("LOGIN", Context.MODE_PRIVATE)
+                val isLan = sharedPreference.getString("isLanguage", "en")
+
+                val id = userMesssages.messageid[0].messageid
+                val messageData = userMesssages.message.filter { it.id == id }
+                var questionArray = ArrayList<QuestionRead>()
+                var messageContent = messageData[0].contentEnglish
+                if (isLan != "en") {
+                    messageContent = messageData[0].contentNepali
                 }
-            }
 
-            override fun onCancelled(databaseError: DatabaseError) {
+                if (messageData[0].questionsidEnglish.isNotEmpty()) {
+                    var groupSplitArray = emptyArray<String>()
+
+                    if (isLan != "en") {
+                        groupSplitArray = messageData[0].questionsidNepali.split(",").toTypedArray()
+                    } else {
+                        groupSplitArray =
+                            messageData[0].questionsidEnglish.split(",").toTypedArray()
+                    }
+                    for (i in 0 until groupSplitArray!!.size) {
+                        val messageData =
+                            userMesssages.questions.filter { it.id == groupSplitArray[i] }
+                        val qR = QuestionRead(messageData[0].questions, messageData[0].id)
+                        questionArray.add(qR)
+                    }
+                }
+                updateContent(messageContent, questionArray)
+                loading!!.visibility = View.GONE
+            } else {
+                cu.showAlert(getString(R.string.no_data_available), this)
+                loading!!.visibility = View.GONE
             }
         }
-        databaseReference!!.addValueEventListener(postListener)
-
     }
 
     private fun startFetch() {
         if (cu.isNetworkAvailable(this)) {
-            updateFCMIdToServer()
+            loading!!.visibility = View.VISIBLE
+            val sharedPreference = getSharedPreferences("LOGIN", Context.MODE_PRIVATE)
+            val isGroupId = sharedPreference.getString("groupId", "")
+            aboutPageViewModel.getUserMessagesandGroups(this, isGroupId!!)
         } else {
             displayMessageInAlert(getString(R.string.no_internet))
             loading!!.visibility = View.GONE
@@ -390,19 +386,5 @@ class UserHomePage : AppCompatActivity() {
         donarList!!.layoutManager = LinearLayoutManager(this)
         val adapter = QuestionAdapter(this, questionArray, content)
         donarList!!.adapter = adapter
-    }
-
-    private fun updateFCMIdToServer() {
-        val sharedPreference = getSharedPreferences("FCMID", Context.MODE_PRIVATE)
-        val isFcmSent = sharedPreference.getInt("isFcmSent", 0)
-        val fcmToken = sharedPreference.getString("Token", "")
-        if (isFcmSent == 0 && fcmToken!!.isNotEmpty()) {
-            var editor = sharedPreference.edit()
-            editor.putInt("isFcmSent", 1)
-            editor.commit()
-            val databaseReference = firebaseDatabase!!.getReference("FCMToken")
-            databaseReference.setValue(fcmToken)
-        }
-
     }
 }

@@ -76,7 +76,7 @@ class LoginPage : AppCompatActivity() {
                 displayMessageInAlert(getString(R.string.please_enter_password).toUpperCase())
             } else {
                 loginButton.startAnimation()
-                startFetch()
+                startFetch(userid.text.toString(), password.text.toString())
             }
         }
         userid.requestFocus()
@@ -90,11 +90,16 @@ class LoginPage : AppCompatActivity() {
         }
 
         commonViewModel.responseContent.observe(this) { result ->
-            if (result.userId.contains(userid.text.toString()) && result.password.contains(password.text.toString())) {
+            if (result.data.isNotEmpty()) {
                 val sharedPreference = getSharedPreferences("LOGIN", Context.MODE_PRIVATE)
                 var editor = sharedPreference.edit()
                 editor.putInt("isLoggedIn", 1)
-                if (userid.text.toString() == "user" && password.text.toString() == "user") {
+                editor.putString("userId", result.data[0].userid)
+                if (result.data[0].type == "user") {
+                    val sharedPreferenceFcm = getSharedPreferences("FCMID", Context.MODE_PRIVATE)
+                    val fcmToken = sharedPreferenceFcm.getString("Token", "")
+                    commonViewModel.sendFcmId(this, result.data[0].userid, fcmToken!!)
+                    editor.putString("groupId", result.data[0].groupid)
                     editor.putString("isLoggedInType", "user")
                     editor.commit()
                     val moveToReset = Intent(this, UserHomePage::class.java)
@@ -110,13 +115,14 @@ class LoginPage : AppCompatActivity() {
             } else {
                 cu.showAlert(getString(R.string.invalid_login_details), this)
             }
+
             loginButton.revertAnimation()
         }
     }
 
-    private fun startFetch() {
+    private fun startFetch(userId: String, password: String) {
         if (cu.isNetworkAvailable(this)) {
-            commonViewModel.getResponseContent(this)
+            commonViewModel.getLoginResponse(this, userId, password)
         } else {
             displayMessageInAlert(getString(R.string.no_internet).toUpperCase())
         }

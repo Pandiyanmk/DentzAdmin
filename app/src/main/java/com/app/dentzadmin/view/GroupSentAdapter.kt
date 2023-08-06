@@ -4,21 +4,22 @@ import android.content.Context
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.app.dentzadmin.R
-import com.app.dentzadmin.data.model.Question
+import com.app.dentzadmin.data.model.GroupNames
+import com.app.dentzadmin.data.model.SendMessage
 
 
-class DonarAdapter(val ctx: Context, private val mList: List<Question>) :
-    RecyclerView.Adapter<DonarAdapter.ViewHolder>() {
+class GroupSentAdapter(val ctx: Context, private val mList: List<GroupNames>) :
+    RecyclerView.Adapter<GroupSentAdapter.ViewHolder>() {
 
     // create new views
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         // inflates the card_view_design view
         // that is used to hold list item
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.donar_item, parent, false)
+        val view = LayoutInflater.from(parent.context).inflate(R.layout.groupsitem, parent, false)
 
         return ViewHolder(view)
     }
@@ -26,7 +27,7 @@ class DonarAdapter(val ctx: Context, private val mList: List<Question>) :
     // binds the list items to a view
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val ItemsViewModel = mList[position]
-        holder.name.text = "${position + 1}) ${ItemsViewModel.questions}"
+        holder.name.text = ItemsViewModel.name
     }
 
     // return the number of the items in the list
@@ -37,6 +38,5 @@ class DonarAdapter(val ctx: Context, private val mList: List<Question>) :
     // Holds the views for adding it to image and text
     class ViewHolder(ItemView: View) : RecyclerView.ViewHolder(ItemView) {
         val name: TextView = itemView.findViewById(R.id.name)
-        val fulllay: LinearLayout = itemView.findViewById(R.id.fulllay)
     }
 }

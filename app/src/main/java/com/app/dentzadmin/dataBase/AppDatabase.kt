@@ -8,7 +8,7 @@ import com.app.dentzadmin.dao.DataSourceDao
 import com.app.dentzadmin.data.model.SendData
 
 
-@Database(entities = [SendData::class], version = 1, exportSchema = false)
+@Database(entities = [SendData::class], version = 2, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun dataSourceDao(): DataSourceDao
 
@@ -20,7 +20,7 @@ abstract class AppDatabase : RoomDatabase() {
             return INSTANCE ?: synchronized(this) {
                 val instance = Room.databaseBuilder(
                     context.applicationContext, AppDatabase::class.java, "app_database"
-                ).build()
+                ).fallbackToDestructiveMigration().build()
                 INSTANCE = instance
                 instance
             }

@@ -5,5 +5,5 @@ import androidx.room.PrimaryKey
 
 @Entity(tableName = "send_data")
 data class SendData(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0, val message: String, var groups: String
+    @PrimaryKey(autoGenerate = true) val id: Int = 0, val messageid: String, var groupid: String
 )

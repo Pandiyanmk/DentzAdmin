@@ -34,4 +34,6 @@
     <string name="message_sent_by_admin_to_groups">Message sent By Admin To Groups</string>
     <string name="message">Message:</string>
     <string name="message_sent_to_group">Message sent to group:</string>
+    <string name="invalid_user_id">Invalid User Id</string>
+    <string name="no_data_available">No Data Available</string>
 </resources>

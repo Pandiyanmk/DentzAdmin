@@ -5,9 +5,12 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.app.dentzadmin.data.model.AdminSentMessage
+import com.app.dentzadmin.data.model.GroupMessages
+import com.app.dentzadmin.data.model.LoginCallResponse
 import com.app.dentzadmin.data.model.MessageSentFromAdminToGroup
-import com.app.dentzadmin.data.model.SampleResponse
 import com.app.dentzadmin.data.model.SendData
+import com.app.dentzadmin.data.model.UserGroupMessages
 import com.app.dentzadmin.dataBase.AppDatabase
 import com.app.dentzadmin.repository.MainRepository
 import com.app.dentzadmin.util.NetworkState
@@ -25,9 +28,22 @@ class CommonViewModel constructor(private val authCheckRepository: MainRepositor
 
     val loading = MutableLiveData<Boolean>()
 
-    private val _responseContent = MutableLiveData<SampleResponse>()
-    val responseContent: LiveData<SampleResponse>
+    private val _responseContent = MutableLiveData<LoginCallResponse>()
+    val responseContent: LiveData<LoginCallResponse>
         get() = _responseContent
+
+    private val _groupMessageContent = MutableLiveData<GroupMessages>()
+    val groupMessageContent: LiveData<GroupMessages>
+        get() = _groupMessageContent
+
+
+    private val _userGroupMessageContent = MutableLiveData<UserGroupMessages>()
+    val userGroupMessageContent: LiveData<UserGroupMessages>
+        get() = _userGroupMessageContent
+
+    private val _adminSentMessage = MutableLiveData<AdminSentMessage>()
+    val adminSentMessage: LiveData<AdminSentMessage>
+        get() = _adminSentMessage
 
     private val _errorMessage = MutableLiveData<String>()
     private val _inserted = MutableLiveData<String>()
@@ -48,11 +64,11 @@ class CommonViewModel constructor(private val authCheckRepository: MainRepositor
     val isInserted: LiveData<Boolean>
         get() = _isInserted
 
-    /* Get Content From Api */
-    fun getResponseContent(ctx: Context) {
+    /* Get Login Content From Api */
+    fun getLoginResponse(ctx: Context, userId: String, password: String) {
         viewModelScope.launch {
-            authCheckRepository.getResponse(ctx).flowOn(Dispatchers.IO).catch { }
-                .collect { response ->
+            authCheckRepository.getLoginResponse(ctx, userId, password).flowOn(Dispatchers.IO)
+                .catch { }.collect { response ->
                     stopLoader()
                     when (response) {
                         is NetworkState.Success -> {
@@ -67,23 +83,110 @@ class CommonViewModel constructor(private val authCheckRepository: MainRepositor
         }
     }
 
+    /* Get Forgot Password Content From Api */
+    fun getForgotPasswordResponse(ctx: Context, userId: String) {
+        viewModelScope.launch {
+            authCheckRepository.getForgotPasswordResponse(ctx, userId).flowOn(Dispatchers.IO)
+                .catch { }.collect { response ->
+                    stopLoader()
+                    when (response) {
+                        is NetworkState.Success -> {
+                            _responseContent.value = response.data!!
+                        }
+
+                        is NetworkState.Error -> {
+                            _errorMessage.value = response.errorMessage
+                        }
+                    }
+                }
+        }
+    }
+
+    fun sendFcmId(ctx: Context, userId: String, fcmId: String) {
+        viewModelScope.launch {
+            authCheckRepository.sendFcmID(ctx, userId, fcmId)
+        }
+    }
+
+    fun adminSentMessage(ctx: Context, messageid: String, groupid: String) {
+        viewModelScope.launch {
+            authCheckRepository.adminSentMessage(ctx, messageid, groupid)
+        }
+    }
+
+    /* Get Login Content From Api */
+    fun getMessagesandGroups(ctx: Context) {
+        viewModelScope.launch {
+            authCheckRepository.groupMessages(ctx).flowOn(Dispatchers.IO).catch { }
+                .collect { response ->
+                    stopLoader()
+                    when (response) {
+                        is NetworkState.Success -> {
+                            _groupMessageContent.value = response.data!!
+                        }
+
+                        is NetworkState.Error -> {
+                            _errorMessage.value = response.errorMessage
+                        }
+                    }
+                }
+        }
+    }
+
+    fun getUserMessagesandGroups(ctx: Context, groupId: String) {
+        viewModelScope.launch {
+            authCheckRepository.userGroupMessages(ctx, groupId).flowOn(Dispatchers.IO).catch { }
+                .collect { response ->
+                    stopLoader()
+                    when (response) {
+                        is NetworkState.Success -> {
+                            _userGroupMessageContent.value = response.data!!
+                        }
+
+                        is NetworkState.Error -> {
+                            _errorMessage.value = response.errorMessage
+                        }
+                    }
+                }
+        }
+    }
+
+    /* Get get AdminSent Message From Api */
+    fun getAdminSentMessage(ctx: Context) {
+        viewModelScope.launch {
+            authCheckRepository.getAdminSentMessage(ctx).flowOn(Dispatchers.IO).catch { }
+                .collect { response ->
+                    stopLoader()
+                    when (response) {
+                        is NetworkState.Success -> {
+                            _adminSentMessage.value = response.data!!
+                        }
+
+                        is NetworkState.Error -> {
+                            _errorMessage.value = response.errorMessage
+                        }
+                    }
+                }
+        }
+    }
+
     fun insertData(sendData: SendData, ctx: Context) {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
                 var dataSource = AppDatabase.getDatabase(ctx).dataSourceDao()
-                val messageList = dataSource.getData(sendData.message)
-                var sentToServerGroups = sendData.groups
+                val messageList = dataSource.getData(sendData.messageid)
+                var sentToServerGroups = sendData.groupid
                 if (messageList.isEmpty()) {
                     dataSource.insertData(sendData)
                 } else {
-                    val data = dataSource.getMessageData(sendData.message)
-                    val getAddGroups = data.groups + "," + sendData.groups
-                    dataSource.updateGroup(sendData.message, getAddGroups)
+                    val data = dataSource.getMessageData(sendData.messageid)
+                    val getAddGroups = data.groupid + "," + sendData.groupid
+                    dataSource.updateGroup(sendData.messageid, getAddGroups)
                     sentToServerGroups = getAddGroups
                 }
-                _inserted.postValue(sendData.message)
+                _inserted.postValue(sendData.messageid)
                 val messageSentFromAdminToGroup = MessageSentFromAdminToGroup(
-                    content = sendData.message, groups = sentToServerGroups
+                    content = sendData.messageid, groups = sentToServerGroups
                 )
                 _sentFromAdmin.postValue(messageSentFromAdminToGroup)
             }
@@ -119,7 +222,7 @@ class CommonViewModel constructor(private val authCheckRepository: MainRepositor
                 if (dataSource == null) {
                     _groupName.postValue("")
                 } else {
-                    _groupName.postValue(dataSource.groups)
+                    _groupName.postValue(dataSource.groupid)
                 }
             }
         }

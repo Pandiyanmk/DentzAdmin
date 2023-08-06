@@ -18,8 +18,7 @@ import org.greenrobot.eventbus.EventBus
 class GroupAdapter(
     val ctx: Context,
     private val mList: List<Group>,
-    private val maxSelect: Int,
-    private val groupName: String
+    private val maxSelect: Int
 ) : RecyclerView.Adapter<GroupAdapter.ViewHolder>() {
 
     // create new views
@@ -40,7 +39,7 @@ class GroupAdapter(
 
         holder.checkBox.isChecked = ItemsViewModel.status == 2 || ItemsViewModel.status == 1
 
-        if (groupName.contains(ItemsViewModel.name)) {
+        if (ItemsViewModel.status == 2) {
             holder.name.text = "${ItemsViewModel.name}\n${ctx.getString(R.string.sent)}"
             holder.name.setTextColor(Color.LTGRAY)
         } else {
