@@ -155,11 +155,6 @@ class HomePage : AppCompatActivity() {
                     messageid = messageSelected[0].id, groupid = commaremovedGroup
                 )
                 aboutPageViewModel.insertData(sendData, this)
-
-                /*val messageToFirebase = MessageToFirebase(
-                    messageSelected[0].contentEnglish, messageSelected[0].questions
-                )
-                addDatatoFirebase(messageToFirebase)*/
             }
         }
 
@@ -176,7 +171,16 @@ class HomePage : AppCompatActivity() {
 
         }
 
+        aboutPageViewModel.messageSentAdmin.observe(this) { Status ->
+            if (Status.status != "1") {
+                cu.showAlert(getString(R.string.message_sent_to_admin_failed_restart_app), this)
+            }
+            loading!!.visibility = View.GONE
+
+        }
+
         aboutPageViewModel.sentFromAdmin.observe(this) { messageSentFromAdmin ->
+            loading!!.visibility = View.VISIBLE
             aboutPageViewModel.adminSentMessage(
                 this, messageSentFromAdmin.content, messageSentFromAdmin.groups
             )

@@ -29,14 +29,10 @@ class AdminSentAdapter(val ctx: Context, private val mList: List<SendMessage>) :
         val ItemsViewModel = mList[position]
         holder.name.text = ItemsViewModel.content
 
-        val ar = ArrayList<GroupNames>()
-        val parts = ItemsViewModel.groups.split(',')
-        for (i in parts.indices) {
-            ar.add(GroupNames(parts[i] + ": Sent To 1 / Total Read 0"))
-        }
-        val layoutManager = GridLayoutManager(ctx, 1)
+        val parts = ItemsViewModel.groups
+        val layoutManager = GridLayoutManager(ctx, 2)
         holder.groupList!!.layoutManager = layoutManager
-        val adapter = GroupSentAdapter(ctx, ar)
+        val adapter = GroupSentAdapter(ctx, parts)
         holder.groupList!!.adapter = adapter
     }
 

@@ -100,6 +100,7 @@ class LoginPage : AppCompatActivity() {
                     val fcmToken = sharedPreferenceFcm.getString("Token", "")
                     commonViewModel.sendFcmId(this, result.data[0].userid, fcmToken!!)
                     editor.putString("groupId", result.data[0].groupid)
+                    editor.putString("userId", result.data[0].userid)
                     editor.putString("isLoggedInType", "user")
                     editor.commit()
                     val moveToReset = Intent(this, UserHomePage::class.java)

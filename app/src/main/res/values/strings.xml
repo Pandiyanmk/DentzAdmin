@@ -36,4 +36,7 @@
     <string name="message_sent_to_group">Message sent to group:</string>
     <string name="invalid_user_id">Invalid User Id</string>
     <string name="no_data_available">No Data Available</string>
+    <string name="message_sent_to_admin_failed_restart_app">Message Sent to Admin Failed Restart App</string>
+    <string name="sent_to">\nSent to: </string>
+    <string name="users_replied">\nUsers Replied: </string>
 </resources>

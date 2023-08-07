@@ -36,4 +36,7 @@
     <string name="message_sent_to_group">समूहमा सन्देश पठाइयो:</string>
     <string name="invalid_user_id">अवैध प्रयोगकर्ता आईडी</string>
     <string name="no_data_available">कुनै डाटा उपलब्ध छैन</string>
+    <string name="message_sent_to_admin_failed_restart_app">एप रिस्टार्ट गर्न असफल भएको व्यवस्थापकलाई सन्देश पठाइयो</string>
+    <string name="sent_to">\nपठाइयो: </string>
+    <string name="users_replied">\nप्रयोगकर्ताहरूले जवाफ दिए: </string>
 </resources>

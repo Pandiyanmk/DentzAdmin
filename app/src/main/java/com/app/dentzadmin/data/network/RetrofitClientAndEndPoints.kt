@@ -6,6 +6,7 @@ import com.app.dentzadmin.data.model.GroupMessages
 import com.app.dentzadmin.data.model.LoginCallResponse
 import com.app.dentzadmin.data.model.Status
 import com.app.dentzadmin.data.model.UserGroupMessages
+import com.app.dentzadmin.data.model.ViewReportsData
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -29,13 +30,25 @@ interface RetrofitClientAndEndPoints {
         @Query("userId") userId: String, @Query("fcmId") fcmId: String
     ): Response<Status>
 
+    @GET("savequestionid.php")
+    suspend fun sendAnswer(
+        @Query("messageid") messageid: String,
+        @Query("questionid") questionid: String,
+        @Query("userid") userid: String,
+        @Query("groupid") groupid: String
+    ): Response<Status>
+
     @GET("groupnames.php")
     suspend fun groupMessages(
     ): Response<GroupMessages>
 
+    @GET("reports.php")
+    suspend fun getReports(
+    ): Response<ViewReportsData>
+
     @GET("userHomePage.php")
     suspend fun userGroupMessages(
-        @Query("groupid") groupid: String
+        @Query("groupid") groupid: String, @Query("userid") userId: String
     ): Response<UserGroupMessages>
 
     @GET("getAdminSentMessage.php")

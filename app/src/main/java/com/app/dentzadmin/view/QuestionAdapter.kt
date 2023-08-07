@@ -36,16 +36,15 @@ class QuestionAdapter(
             holder.name.setOnClickListener {
                 val isAnswered = sharedPreference.getString("isAnswered", "")
                 if (isAnswered.equals("")) {
-                    EventBus.getDefault().post("done")
+                    EventBus.getDefault().post(ItemsViewModel.id)
                     var editor = sharedPreference.edit()
-                    editor.putString("isAnswered", position.toString())
-                    editor.putString("content", content)
+                    editor.putString("isAnswered", ItemsViewModel.id)
                     editor.commit()
                     notifyDataSetChanged()
                 }
             }
         } else {
-            if (isAnswered!!.toInt() == position) {
+            if (isAnswered == ItemsViewModel.id) {
                 holder.name.setTextColor(Color.parseColor("#ffffff"))
             } else {
                 holder.name.setTextColor(Color.parseColor("#736F6F"))

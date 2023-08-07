@@ -27,7 +27,7 @@ class GroupSentAdapter(val ctx: Context, private val mList: List<GroupNames>) :
     // binds the list items to a view
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val ItemsViewModel = mList[position]
-        holder.name.text = ItemsViewModel.name
+        holder.name.text = ItemsViewModel.name+ctx.getString(R.string.users_replied)+ItemsViewModel.repliedCount+" "
     }
 
     // return the number of the items in the list

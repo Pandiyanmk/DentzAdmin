@@ -34,8 +34,6 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.util.Util
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import nl.dionsegijn.konfetti.xml.KonfettiView
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
@@ -52,6 +50,10 @@ class UserHomePage : AppCompatActivity() {
     var textToSpeech: TextToSpeech? = null
     private var konfettiView: KonfettiView? = null
     var speak: FloatingActionButton? = null
+
+    var userId: String = ""
+    var groupId: String = ""
+    var messageId: String = ""
 
     private lateinit var aboutPageViewModel: CommonViewModel
     private var play: FloatingActionButton? = null
@@ -201,6 +203,7 @@ class UserHomePage : AppCompatActivity() {
                 val messageData = userMesssages.message.filter { it.id == id }
                 var questionArray = ArrayList<QuestionRead>()
                 var messageContent = messageData[0].contentEnglish
+                messageId = id
                 if (isLan != "en") {
                     messageContent = messageData[0].contentNepali
                 }
@@ -221,6 +224,19 @@ class UserHomePage : AppCompatActivity() {
                         questionArray.add(qR)
                     }
                 }
+                if (userMesssages.answered.size > 0) {
+                    val sharedPreference = getSharedPreferences("LOGIN", Context.MODE_PRIVATE)
+                    val isAnsweredContent = sharedPreference.getString("content", "")
+                    var editor = sharedPreference.edit()
+                    editor.putString("isAnswered", userMesssages.answered[0].questionid)
+                    editor.commit()
+                } else {
+                    val sharedPreference = getSharedPreferences("LOGIN", Context.MODE_PRIVATE)
+                    val isAnsweredContent = sharedPreference.getString("content", "")
+                    var editor = sharedPreference.edit()
+                    editor.putString("isAnswered", "")
+                    editor.commit()
+                }
                 updateContent(messageContent, questionArray)
                 loading!!.visibility = View.GONE
             } else {
@@ -235,7 +251,9 @@ class UserHomePage : AppCompatActivity() {
             loading!!.visibility = View.VISIBLE
             val sharedPreference = getSharedPreferences("LOGIN", Context.MODE_PRIVATE)
             val isGroupId = sharedPreference.getString("groupId", "")
-            aboutPageViewModel.getUserMessagesandGroups(this, isGroupId!!)
+            userId = sharedPreference.getString("userId", "")!!
+            groupId= sharedPreference.getString("groupId", "")!!
+            aboutPageViewModel.getUserMessagesandGroups(this, isGroupId!!, userId)
         } else {
             displayMessageInAlert(getString(R.string.no_internet))
             loading!!.visibility = View.GONE
@@ -257,6 +275,7 @@ class UserHomePage : AppCompatActivity() {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: String?) {
         konfettiView!!.start(Presets.explode())
+        aboutPageViewModel.sendAnswer(this, messageId, event!!, userId,groupId)
     }
 
     private fun initializePlayer(url: String) {
@@ -374,14 +393,7 @@ class UserHomePage : AppCompatActivity() {
             speak!!.visibility = View.VISIBLE
             textContent!!.visibility = View.VISIBLE
         }
-        val sharedPreference = getSharedPreferences("LOGIN", Context.MODE_PRIVATE)
-        val isAnsweredContent = sharedPreference.getString("content", "")
-        if (content != isAnsweredContent) {
-            var editor = sharedPreference.edit()
-            editor.putString("isAnswered", "")
-            editor.putString("content", "")
-            editor.commit()
-        }
+
 
         donarList!!.layoutManager = LinearLayoutManager(this)
         val adapter = QuestionAdapter(this, questionArray, content)

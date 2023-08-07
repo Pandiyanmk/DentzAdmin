@@ -10,7 +10,9 @@ import com.app.dentzadmin.data.model.GroupMessages
 import com.app.dentzadmin.data.model.LoginCallResponse
 import com.app.dentzadmin.data.model.MessageSentFromAdminToGroup
 import com.app.dentzadmin.data.model.SendData
+import com.app.dentzadmin.data.model.Status
 import com.app.dentzadmin.data.model.UserGroupMessages
+import com.app.dentzadmin.data.model.ViewReportsData
 import com.app.dentzadmin.dataBase.AppDatabase
 import com.app.dentzadmin.repository.MainRepository
 import com.app.dentzadmin.util.NetworkState
@@ -35,6 +37,14 @@ class CommonViewModel constructor(private val authCheckRepository: MainRepositor
     private val _groupMessageContent = MutableLiveData<GroupMessages>()
     val groupMessageContent: LiveData<GroupMessages>
         get() = _groupMessageContent
+
+    private val _messageSentAdmin = MutableLiveData<Status>()
+    val messageSentAdmin: LiveData<Status>
+        get() = _messageSentAdmin
+
+    private val _getReports = MutableLiveData<ViewReportsData>()
+    val getReports: LiveData<ViewReportsData>
+        get() = _getReports
 
 
     private val _userGroupMessageContent = MutableLiveData<UserGroupMessages>()
@@ -108,9 +118,29 @@ class CommonViewModel constructor(private val authCheckRepository: MainRepositor
         }
     }
 
+    fun sendAnswer(
+        ctx: Context, messageid: String, questionid: String, userid: String, groupid: String
+    ) {
+        viewModelScope.launch {
+            authCheckRepository.sendAnswer(ctx, messageid, questionid, userid, groupid)
+        }
+    }
+
     fun adminSentMessage(ctx: Context, messageid: String, groupid: String) {
         viewModelScope.launch {
-            authCheckRepository.adminSentMessage(ctx, messageid, groupid)
+            authCheckRepository.adminSentMessage(ctx, messageid, groupid).flowOn(Dispatchers.IO)
+                .catch { }.collect { response ->
+                    stopLoader()
+                    when (response) {
+                        is NetworkState.Success -> {
+                            _messageSentAdmin.value = response.data!!
+                        }
+
+                        is NetworkState.Error -> {
+                            _errorMessage.value = response.errorMessage
+                        }
+                    }
+                }
         }
     }
 
@@ -133,10 +163,10 @@ class CommonViewModel constructor(private val authCheckRepository: MainRepositor
         }
     }
 
-    fun getUserMessagesandGroups(ctx: Context, groupId: String) {
+    fun getUserMessagesandGroups(ctx: Context, groupId: String, userId: String) {
         viewModelScope.launch {
-            authCheckRepository.userGroupMessages(ctx, groupId).flowOn(Dispatchers.IO).catch { }
-                .collect { response ->
+            authCheckRepository.userGroupMessages(ctx, groupId, userId).flowOn(Dispatchers.IO)
+                .catch { }.collect { response ->
                     stopLoader()
                     when (response) {
                         is NetworkState.Success -> {
@@ -225,6 +255,44 @@ class CommonViewModel constructor(private val authCheckRepository: MainRepositor
                     _groupName.postValue(dataSource.groupid)
                 }
             }
+        }
+    }
+
+
+    fun getReports(ctx: Context, userId: String) {
+        viewModelScope.launch {
+            authCheckRepository.getForgotPasswordResponse(ctx, userId).flowOn(Dispatchers.IO)
+                .catch { }.collect { response ->
+                    stopLoader()
+                    when (response) {
+                        is NetworkState.Success -> {
+                            _responseContent.value = response.data!!
+                        }
+
+                        is NetworkState.Error -> {
+                            _errorMessage.value = response.errorMessage
+                        }
+                    }
+                }
+        }
+    }
+
+
+    fun getReports(ctx: Context) {
+        viewModelScope.launch {
+            authCheckRepository.getReports(ctx).flowOn(Dispatchers.IO).catch { }
+                .collect { response ->
+                    stopLoader()
+                    when (response) {
+                        is NetworkState.Success -> {
+                            _getReports.value = response.data!!
+                        }
+
+                        is NetworkState.Error -> {
+                            _errorMessage.value = response.errorMessage
+                        }
+                    }
+                }
         }
     }
 
