@@ -46,7 +46,47 @@ class GroupAdapter(
             holder.name.text = ItemsViewModel.name
         }
 
+        holder.nameLay.setOnClickListener {
+            // Same Lines of code below
+            if (ItemsViewModel.status != 2) {
+                if (getCount.size <= maxSelect) {
+                    var statusResult = 0
+                    if (ItemsViewModel.status == 0) {
+                        statusResult = 1
+                    }
+                    EventBus.getDefault().post("$position,$statusResult")
+                } else {
+                    if (ItemsViewModel.status == 1) {
+                        EventBus.getDefault().post("$position,0")
+                    } else {
+                        Toast.makeText(
+                            ctx, ctx.getString(R.string.limit_exceed), Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
         holder.fulllay.setOnClickListener {
+            // Same Lines of code below
+            if (ItemsViewModel.status != 2) {
+                if (getCount.size <= maxSelect) {
+                    var statusResult = 0
+                    if (ItemsViewModel.status == 0) {
+                        statusResult = 1
+                    }
+                    EventBus.getDefault().post("$position,$statusResult")
+                } else {
+                    if (ItemsViewModel.status == 1) {
+                        EventBus.getDefault().post("$position,0")
+                    } else {
+                        Toast.makeText(
+                            ctx, ctx.getString(R.string.limit_exceed), Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                }
+            }
+        }
+        holder.name.setOnClickListener {
             if (ItemsViewModel.status != 2) {
                 if (getCount.size <= maxSelect) {
                     var statusResult = 0
@@ -77,5 +117,6 @@ class GroupAdapter(
         val name: TextView = itemView.findViewById(R.id.name)
         val checkBox: CheckBox = itemView.findViewById(R.id.checkBox)
         val fulllay: LinearLayout = itemView.findViewById(R.id.fulllay)
+        val nameLay: LinearLayout = itemView.findViewById(R.id.nameLay)
     }
 }
