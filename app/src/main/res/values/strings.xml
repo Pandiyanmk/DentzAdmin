@@ -39,4 +39,10 @@
     <string name="message_sent_to_admin_failed_restart_app">Message Sent to Admin Failed Restart App</string>
     <string name="sent_to">\nSent to: </string>
     <string name="users_replied">\nUsers Replied: </string>
+    <string name="notification_permission">Notification Permission</string>
+    <string name="notification_permission_is_required_please_allow_notification_permission_from_setting">Notification permission is required, Please allow notification permission from setting</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">Ok</string>
+    <string name="notification_permission_is_required_to_show_notification">Notification permission is required, to show notification</string>
+    <string name="alert">Alert</string>
 </resources>

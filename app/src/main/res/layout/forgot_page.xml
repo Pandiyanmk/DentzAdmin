@@ -65,7 +65,7 @@
                 android:hint="@string/user_id"
                 android:textColor="@color/black"
                 android:imeOptions="actionDone"
-                android:inputType="text"
+                android:inputType="phone"
                 android:maxLength="15"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp" />

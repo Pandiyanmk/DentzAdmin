@@ -2,6 +2,7 @@ package com.app.dentzadmin.repository
 
 import android.content.Context
 import com.app.dentzadmin.data.model.AdminSentMessage
+import com.app.dentzadmin.data.model.FCMResponse
 import com.app.dentzadmin.data.model.GroupMessages
 import com.app.dentzadmin.data.model.LoginCallResponse
 import com.app.dentzadmin.data.model.Status
@@ -190,6 +191,38 @@ class MainRepository {
         try {
             var response =
                 RetrofitClientAndEndPoints.getInstance(ctx).adminSentMessage(messageid, groupid)
+
+            return if (response.isSuccessful) {
+                val responseBody = response.body()
+                if (responseBody != null) {
+                    flow {
+                        emit(NetworkState.Success(responseBody))
+                    }
+                } else {
+                    flow {
+                        emit(NetworkState.Error(response.message()))
+                    }
+                }
+            } else {
+                flow {
+                    emit(NetworkState.Error(response.message()))
+                }
+            }
+        } catch (e: Exception) {
+            return flow {
+                emit(NetworkState.Error(e.toString()))
+            }
+        }
+    }
+
+
+    /* API CALL To Send Push */
+    suspend fun sendPush(
+        ctx: Context, groupId: String, messageContent: String
+    ): Flow<NetworkState<FCMResponse>> {
+        try {
+            var response =
+                RetrofitClientAndEndPoints.getInstance(ctx).sendPush(groupId, messageContent)
 
             return if (response.isSuccessful) {
                 val responseBody = response.body()

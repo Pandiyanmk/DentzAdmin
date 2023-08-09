@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.app.dentzadmin.data.model.AdminSentMessage
+import com.app.dentzadmin.data.model.FCMResponse
 import com.app.dentzadmin.data.model.GroupMessages
 import com.app.dentzadmin.data.model.LoginCallResponse
 import com.app.dentzadmin.data.model.MessageSentFromAdminToGroup
@@ -41,6 +42,10 @@ class CommonViewModel constructor(private val authCheckRepository: MainRepositor
     private val _messageSentAdmin = MutableLiveData<Status>()
     val messageSentAdmin: LiveData<Status>
         get() = _messageSentAdmin
+
+    private val _fcmResponse = MutableLiveData<FCMResponse>()
+    val fcmResponse: LiveData<FCMResponse>
+        get() = _fcmResponse
 
     private val _getReports = MutableLiveData<ViewReportsData>()
     val getReports: LiveData<ViewReportsData>
@@ -134,6 +139,24 @@ class CommonViewModel constructor(private val authCheckRepository: MainRepositor
                     when (response) {
                         is NetworkState.Success -> {
                             _messageSentAdmin.value = response.data!!
+                        }
+
+                        is NetworkState.Error -> {
+                            _errorMessage.value = response.errorMessage
+                        }
+                    }
+                }
+        }
+    }
+
+    fun sendPush(ctx: Context, groupId: String, messageContent: String) {
+        viewModelScope.launch {
+            authCheckRepository.sendPush(ctx, groupId, messageContent).flowOn(Dispatchers.IO)
+                .catch { }.collect { response ->
+                    stopLoader()
+                    when (response) {
+                        is NetworkState.Success -> {
+                            _fcmResponse.value = response.data!!
                         }
 
                         is NetworkState.Error -> {

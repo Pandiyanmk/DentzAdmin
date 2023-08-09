@@ -4,7 +4,9 @@ import android.content.Context
 import android.content.Intent
 import android.media.MediaPlayer
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS
 import android.speech.tts.TextToSpeech
 import android.view.View
 import android.view.animation.AccelerateInterpolator
@@ -15,6 +17,7 @@ import android.widget.LinearLayout
 import android.widget.ProgressBar
 import android.widget.SeekBar
 import android.widget.TextView
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -33,6 +36,7 @@ import com.google.android.exoplayer2.ui.StyledPlayerView
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSource
 import com.google.android.exoplayer2.util.Util
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import nl.dionsegijn.konfetti.xml.KonfettiView
 import org.greenrobot.eventbus.EventBus
@@ -89,6 +93,12 @@ class UserHomePage : AppCompatActivity() {
         aboutPageViewModel = ViewModelProvider(
             this, CommonViewModelFactory(MainRepository())
         )[CommonViewModel::class.java]
+
+        if (Build.VERSION.SDK_INT >= 33) {
+            notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            hasNotificationPermissionGranted = true
+        }
 
         /* SetUp Views */
         loading = findViewById(R.id.loading)
@@ -252,7 +262,7 @@ class UserHomePage : AppCompatActivity() {
             val sharedPreference = getSharedPreferences("LOGIN", Context.MODE_PRIVATE)
             val isGroupId = sharedPreference.getString("groupId", "")
             userId = sharedPreference.getString("userId", "")!!
-            groupId= sharedPreference.getString("groupId", "")!!
+            groupId = sharedPreference.getString("groupId", "")!!
             aboutPageViewModel.getUserMessagesandGroups(this, isGroupId!!, userId)
         } else {
             displayMessageInAlert(getString(R.string.no_internet))
@@ -275,7 +285,7 @@ class UserHomePage : AppCompatActivity() {
     @Subscribe(threadMode = ThreadMode.MAIN)
     fun onMessageEvent(event: String?) {
         konfettiView!!.start(Presets.explode())
-        aboutPageViewModel.sendAnswer(this, messageId, event!!, userId,groupId)
+        aboutPageViewModel.sendAnswer(this, messageId, event!!, userId, groupId)
     }
 
     private fun initializePlayer(url: String) {
@@ -399,4 +409,48 @@ class UserHomePage : AppCompatActivity() {
         val adapter = QuestionAdapter(this, questionArray, content)
         donarList!!.adapter = adapter
     }
+
+
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted ->
+            hasNotificationPermissionGranted = isGranted
+            if (!isGranted) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    if (Build.VERSION.SDK_INT >= 33) {
+                        if (shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)) {
+                            showNotificationPermissionRationale()
+                        } else {
+                            showSettingDialog()
+                        }
+                    }
+                }
+            }
+        }
+
+
+    private fun showSettingDialog() {
+        MaterialAlertDialogBuilder(
+            this, com.google.android.material.R.style.MaterialAlertDialog_Material3
+        ).setTitle(getString(R.string.notification_permission))
+            .setMessage(getString(R.string.notification_permission_is_required_please_allow_notification_permission_from_setting))
+            .setPositiveButton(getString(R.string.ok)) { _, _ ->
+                val intent = Intent(ACTION_APPLICATION_DETAILS_SETTINGS)
+                intent.data = Uri.parse("package:$packageName")
+                startActivity(intent)
+            }.setNegativeButton(getString(R.string.cancel), null).show()
+    }
+
+    private fun showNotificationPermissionRationale() {
+        MaterialAlertDialogBuilder(
+            this, com.google.android.material.R.style.MaterialAlertDialog_Material3
+        ).setTitle(getString(R.string.alert))
+            .setMessage(getString(R.string.notification_permission_is_required_to_show_notification))
+            .setPositiveButton(getString(R.string.ok)) { _, _ ->
+                if (Build.VERSION.SDK_INT >= 33) {
+                    notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                }
+            }.setNegativeButton(getString(R.string.cancel), null).show()
+    }
+
+    var hasNotificationPermissionGranted = false
 }

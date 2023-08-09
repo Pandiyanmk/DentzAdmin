@@ -2,6 +2,7 @@ package com.app.dentzadmin.data.network
 
 import android.content.Context
 import com.app.dentzadmin.data.model.AdminSentMessage
+import com.app.dentzadmin.data.model.FCMResponse
 import com.app.dentzadmin.data.model.GroupMessages
 import com.app.dentzadmin.data.model.LoginCallResponse
 import com.app.dentzadmin.data.model.Status
@@ -59,6 +60,11 @@ interface RetrofitClientAndEndPoints {
     suspend fun adminSentMessage(
         @Query("messageid") messageid: String, @Query("groupid") groupid: String
     ): Response<Status>
+
+    @GET("sendnotification.php")
+    suspend fun sendPush(
+        @Query("groupid") groupid: String, @Query("message") messageContent: String
+    ): Response<FCMResponse>
 
     /* Building Retrofit with Base URL */
     companion object {

@@ -39,4 +39,10 @@
     <string name="message_sent_to_admin_failed_restart_app">एप रिस्टार्ट गर्न असफल भएको व्यवस्थापकलाई सन्देश पठाइयो</string>
     <string name="sent_to">\nपठाइयो: </string>
     <string name="users_replied">\nप्रयोगकर्ताहरूले जवाफ दिए: </string>
+    <string name="notification_permission">सूचना अनुमति</string>
+    <string name="notification_permission_is_required_please_allow_notification_permission_from_setting">सूचना अनुमति आवश्यक छ, कृपया सेटिङबाट सूचना अनुमति दिनुहोस्</string>
+    <string name="cancel">रद्द गर्नुहोस्</string>
+    <string name="ok">ठिक छ</string>
+    <string name="notification_permission_is_required_to_show_notification">सूचना देखाउनको लागि सूचना अनुमति आवश्यक छ</string>
+    <string name="alert">अलर्ट</string>
 </resources>

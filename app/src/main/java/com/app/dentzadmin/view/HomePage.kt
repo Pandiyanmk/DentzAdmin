@@ -51,7 +51,7 @@ import java.util.concurrent.TimeUnit
 class HomePage : AppCompatActivity() {
     private val cu = CommonUtil()
     var isStart = false
-    var maxSelect = 5
+    var maxSelect = 0
     var isHasVideoUrl = ""
     private var loading: ProgressBar? = null
     private var donarList: RecyclerView? = null
@@ -89,6 +89,8 @@ class HomePage : AppCompatActivity() {
     var firebaseDatabase: FirebaseDatabase? = null
     var databaseReference: DatabaseReference? = null
     var tokenToSend: String = ""
+    var groupforPushId = ""
+    var messageforPushContent = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -141,13 +143,14 @@ class HomePage : AppCompatActivity() {
                 val groupBuilder = StringBuilder()
                 for (i in 0 until getCount!!.size) {
                     groupBuilder.append(getCount!![i].id + ",")
+                    groupforPushId = getCount!![i].id
                 }
                 var commaremovedGroup = ""
                 if (groupBuilder.toString().endsWith(",")) {
                     commaremovedGroup = groupBuilder.substring(0, groupBuilder.length - 1)
                 }
                 var messageSelected: List<Message> = messageListData!!.filter { it.status == 1 }
-
+                messageforPushContent = messageSelected[0].contentEnglish
 
                 Toast.makeText(this, getString(R.string.sent), Toast.LENGTH_SHORT).show()
 
@@ -174,9 +177,16 @@ class HomePage : AppCompatActivity() {
         aboutPageViewModel.messageSentAdmin.observe(this) { Status ->
             if (Status.status != "1") {
                 cu.showAlert(getString(R.string.message_sent_to_admin_failed_restart_app), this)
+                loading!!.visibility = View.GONE
+            } else {
+                aboutPageViewModel.sendPush(
+                    this, groupforPushId, messageforPushContent
+                )
             }
-            loading!!.visibility = View.GONE
+        }
 
+        aboutPageViewModel.fcmResponse.observe(this) { _ ->
+            loading!!.visibility = View.GONE
         }
 
         aboutPageViewModel.sentFromAdmin.observe(this) { messageSentFromAdmin ->

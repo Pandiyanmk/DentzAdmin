@@ -45,8 +45,13 @@ class FirebaseMessageReceiver : FirebaseMessagingService() {
         title: String?, message: String?
     ) {
         val intent = Intent(this, GetStartedPage::class.java)
-        val pendingIntent =
+        var pendingIntent = null
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_MUTABLE)
+        } else {
             PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             notificationChannel =
                 NotificationChannel(channelId, description, NotificationManager.IMPORTANCE_HIGH)

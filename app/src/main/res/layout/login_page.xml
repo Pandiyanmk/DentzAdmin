@@ -64,7 +64,7 @@
                 android:fontFamily="@font/regular"
                 android:hint="@string/user_id"
                 android:imeOptions="actionNext"
-                android:inputType="text"
+                android:inputType="phone"
                 android:maxLength="15"
                 android:paddingStart="12dp"
                 android:paddingEnd="12dp"
