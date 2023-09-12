@@ -269,9 +269,6 @@ class HomePage : AppCompatActivity() {
 
         aboutPageViewModel.groupMessageContent.observe(this) { result ->
             loading!!.visibility = View.GONE
-            choosemessage!!.visibility = View.VISIBLE
-            choosegroup!!.visibility = View.VISIBLE
-
 
             groupListData = result.group
             val layoutManager = GridLayoutManager(this, 2)
@@ -284,40 +281,44 @@ class HomePage : AppCompatActivity() {
             messageAdapter = MessageAdapter(this, messageListData!!)
             messageList!!.adapter = messageAdapter
 
-            val mData = Message(
-                messageListData!![0].contentEnglish,
-                messageListData!![0].contentNepali,
-                1,
-                messageListData!![0].id,
-                messageListData!![0].questionsidEnglish,
-                messageListData!![0].questionsidNepali
-            )
-            messageListData!![0] = mData
-            messageAdapter.notifyDataSetChanged()
+            if (messageListData!!.isNotEmpty()) {
+                choosemessage!!.visibility = View.VISIBLE
+                choosegroup!!.visibility = View.VISIBLE
+                val mData = Message(
+                    messageListData!![0].contentEnglish,
+                    messageListData!![0].contentNepali,
+                    1,
+                    messageListData!![0].id,
+                    messageListData!![0].questionsidEnglish,
+                    messageListData!![0].questionsidNepali
+                )
+                messageListData!![0] = mData
+                messageAdapter.notifyDataSetChanged()
 
-            val filteredQuestionList = ArrayList<Question>()
-            filteredQuestionList.clear()
-            if (messageListData!![0].questionsidEnglish.isNotEmpty()) {
-                val strs = messageListData!![0].questionsidEnglish.split(",").toTypedArray()
-                for (element in strs) {
-                    val filter = result.questions.filter { it.id == element }
-                    val questionsData = filter[0]
-                    filteredQuestionList.add(questionsData)
+                val filteredQuestionList = ArrayList<Question>()
+                filteredQuestionList.clear()
+                if (messageListData!![0].questionsidEnglish.isNotEmpty()) {
+                    val strs = messageListData!![0].questionsidEnglish.split(",").toTypedArray()
+                    for (element in strs) {
+                        val filter = result.questions.filter { it.id == element }
+                        val questionsData = filter[0]
+                        filteredQuestionList.add(questionsData)
+                    }
+                    if (filteredQuestionList.isNotEmpty()) {
+                        questionListData(filteredQuestionList)
+                    }
                 }
-                if (filteredQuestionList.isNotEmpty()) {
-                    questionListData(filteredQuestionList)
-                }
-            }
 
-            setgroupData(messageListData!![0].id)
+                setgroupData(messageListData!![0].id)
 
-            if (messageListData!!.size > 0) {
-                if (messageListData!![0].contentEnglish.endsWith("mp3")) {
-                    setContent("audio", messageListData!![0].contentEnglish)
-                } else if (messageListData!![0].contentEnglish.endsWith("mp4")) {
-                    setContent("video", messageListData!![0].contentEnglish)
-                } else {
-                    setContent("text", messageListData!![0].contentEnglish)
+                if (messageListData!!.size > 0) {
+                    if (messageListData!![0].contentEnglish.endsWith("mp3")) {
+                        setContent("audio", messageListData!![0].contentEnglish)
+                    } else if (messageListData!![0].contentEnglish.endsWith("mp4")) {
+                        setContent("video", messageListData!![0].contentEnglish)
+                    } else {
+                        setContent("text", messageListData!![0].contentEnglish)
+                    }
                 }
             }
         }

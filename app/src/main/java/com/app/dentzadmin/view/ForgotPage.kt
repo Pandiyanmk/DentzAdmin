@@ -64,7 +64,7 @@ class ForgotPage : AppCompatActivity() {
             if (result.data.isEmpty()) {
                 sent.text = getString(R.string.invalid_user_id)
             } else {
-                sent.text = getString(R.string.password_is_sent_to_the_registered_mobile_number)
+                sent.text = getString(R.string.password_is_sent_to_the_registered_mobile_number)+" "+result.data[0].password
             }
             this.currentFocus?.let { view ->
                 val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
