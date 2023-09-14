@@ -33,11 +33,9 @@ class FirebaseMessageReceiver : FirebaseMessagingService() {
             val sharedPreference = getSharedPreferences("LOGIN", Context.MODE_PRIVATE)
             val isLoggedIn = sharedPreference.getInt("isLoggedIn", 0)
             val isLoggedInType = sharedPreference.getString("isLoggedInType", "")
-            if (isLoggedIn == 1 && isLoggedInType.equals("user")) {
-                showNotification(
-                    remoteMessage.notification!!.title, remoteMessage.notification!!.body
-                )
-            }
+            showNotification(
+                remoteMessage.notification!!.title, remoteMessage.notification!!.body
+            )
         }
     }
 
