@@ -72,7 +72,7 @@ interface RetrofitClientAndEndPoints {
         private var retrofitService: RetrofitClientAndEndPoints? = null
         fun getInstance(ctx: Context): RetrofitClientAndEndPoints {
             if (retrofitService == null) {
-                val retrofit = Retrofit.Builder().baseUrl("http://192.168.0.104/Dentz/")
+                val retrofit = Retrofit.Builder().baseUrl("https://dentzservice.banyanpro.com/")
                     .addConverterFactory(GsonConverterFactory.create()).build()
                 retrofitService = retrofit.create(RetrofitClientAndEndPoints::class.java)
             }
