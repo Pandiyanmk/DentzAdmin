@@ -28,7 +28,7 @@
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="15dp"
                 android:text="Item"
-                android:fontFamily="@font/regular"
+                android:fontFamily="@font/monomedium"
                 android:textColor="@color/white"
                 android:textSize="22sp"
                 android:textStyle="normal" />

@@ -10,23 +10,16 @@ import com.app.dentzadmin.R
 import java.util.Locale
 
 
-class GetStartedPage : AppCompatActivity() {
+class GetStartedPage : BaseActivity() {
     var name: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)/* Hiding ToolBar */
         supportActionBar?.hide()
+        updateLanguage()
         val sharedPreference = getSharedPreferences("LOGIN", Context.MODE_PRIVATE)
         val isLoggedIn = sharedPreference.getInt("isLoggedIn", 0)
         val isLoggedInType = sharedPreference.getString("isLoggedInType", "")
-        val isLan = sharedPreference.getString("isLanguage", "en")
-        val locale = Locale(isLan)
-        Locale.setDefault(locale)
-        val config: Configuration = baseContext.resources.configuration
-        config.locale = locale
-        baseContext.resources.updateConfiguration(
-            config, baseContext.resources.displayMetrics
-        )
         if (isLoggedIn == 1 && isLoggedInType.equals("admin")) {
             val moveToAboutPage = Intent(this, HomePage::class.java)
             startActivity(moveToAboutPage)

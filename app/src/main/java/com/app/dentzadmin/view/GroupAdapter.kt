@@ -44,6 +44,7 @@ class GroupAdapter(
             holder.name.setTextColor(Color.LTGRAY)
         } else {
             holder.name.text = ItemsViewModel.name
+            holder.name.setTextColor(Color.parseColor("#3935BD"))
         }
 
         holder.nameLay.setOnClickListener {

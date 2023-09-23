@@ -30,22 +30,22 @@
             android:id="@+id/username"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:fontFamily="@font/monomedium"
             android:gravity="center"
             android:text="@string/smile_sikkim"
             android:textColor="@color/black"
-            android:fontFamily="@font/regular"
             android:textSize="37sp" />
 
         <!--text view for sub heading-->
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="10sp"
+            android:fontFamily="@font/monomedium"
             android:gravity="center"
             android:text="@string/bringing_happiness_to_your_life"
             android:textColor="@color/black"
             android:textSize="22sp"
-            android:fontFamily="@font/regular"
-            android:layout_marginTop="10sp"
             android:theme="@style/loginPageSubHeadingTextTheme" />
     </LinearLayout>
 
@@ -53,12 +53,12 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="20sp"
+        android:fontFamily="@font/monomedium"
         android:gravity="center"
         android:text="@string/powered_by_srm_sikkim"
         android:textColor="@color/black"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:fontFamily="@font/regular"
         android:theme="@style/loginPageSubHeadingTextTheme" />
 
 

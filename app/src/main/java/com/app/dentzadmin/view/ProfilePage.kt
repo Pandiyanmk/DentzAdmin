@@ -10,12 +10,13 @@ import androidx.cardview.widget.CardView
 import com.app.dentzadmin.R
 
 
-class ProfilePage : AppCompatActivity() {
+class ProfilePage : BaseActivity() {
     var name: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         supportActionBar?.hide()
+        updateLanguage()
         setContentView(R.layout.profile_page)
 
         val logout = findViewById<LinearLayout>(R.id.logout)

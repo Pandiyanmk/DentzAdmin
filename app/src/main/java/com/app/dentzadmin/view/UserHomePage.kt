@@ -46,7 +46,7 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 
-class UserHomePage : AppCompatActivity() {
+class UserHomePage : BaseActivity() {
     private val cu = CommonUtil()
     var isHasVideoUrl = ""
     private var loading: ProgressBar? = null
@@ -84,6 +84,7 @@ class UserHomePage : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        updateLanguage()
         setContentView(R.layout.user_home_page)
 
         /* Hiding ToolBar */

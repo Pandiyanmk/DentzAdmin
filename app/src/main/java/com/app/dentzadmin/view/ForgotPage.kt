@@ -15,13 +15,14 @@ import com.app.dentzadmin.util.CommonUtil
 import com.app.dentzadmin.viewModel.CommonViewModel
 import com.app.dentzadmin.viewModel.CommonViewModelFactory
 
-class ForgotPage : AppCompatActivity() {
+class ForgotPage : BaseActivity() {
     private lateinit var commonViewModel: CommonViewModel
     private val cu = CommonUtil()
     var name: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        updateLanguage()
         setContentView(R.layout.forgot_page)
 
         /* Hiding ToolBar */

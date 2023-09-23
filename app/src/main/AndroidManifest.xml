@@ -29,6 +29,12 @@
             android:name="com.app.dentzadmin.view.ProfilePage"
             android:exported="false"></activity>
         <activity
+            android:name="com.app.dentzadmin.view.dumPage"
+            android:exported="false"></activity>
+        <activity
+            android:name="com.app.dentzadmin.view.postPage"
+            android:exported="false"></activity>
+        <activity
             android:name="com.app.dentzadmin.view.ForgotPage"
             android:exported="false" />
         <activity

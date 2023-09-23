@@ -48,7 +48,7 @@ import org.greenrobot.eventbus.ThreadMode
 import java.util.concurrent.TimeUnit
 
 
-class HomePage : AppCompatActivity() {
+class HomePage : BaseActivity() {
     private val cu = CommonUtil()
     var isStart = false
     var maxSelect = 0
@@ -94,6 +94,7 @@ class HomePage : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        updateLanguage()
         setContentView(R.layout.home_page)
 
         /* Hiding ToolBar */

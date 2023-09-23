@@ -3,7 +3,6 @@ package com.app.dentzadmin.view
 import android.os.Bundle
 import android.view.View
 import android.widget.ProgressBar
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,7 +16,7 @@ import com.app.dentzadmin.viewModel.CommonViewModelFactory
 import com.google.firebase.database.FirebaseDatabase
 
 
-class ViewReports : AppCompatActivity() {
+class ViewReports : BaseActivity() {
     private val cu = CommonUtil()
     private lateinit var aboutPageViewModel: CommonViewModel
     private var loading: ProgressBar? = null
@@ -29,6 +28,7 @@ class ViewReports : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        updateLanguage()
         setContentView(R.layout.viewreports)
 
         /* Hiding ToolBar */
@@ -66,8 +66,11 @@ class ViewReports : AppCompatActivity() {
                 for (j in 0 until groupSplitArray!!.size) {
                     val repliedCount = getReports.reports[i].groupCount[j]
                     val groupName = getReports.groupName.filter { it.id == groupSplitArray[j] }
-                    val groupRepliedDetails = GroupNames(""+repliedCount.count, groupName[0].name+getString(
-                                            R.string.sent_to)+groupName[0].count)
+                    val groupRepliedDetails = GroupNames(
+                        "" + repliedCount.count, groupName[0].name + getString(
+                            R.string.sent_to
+                        ) + groupName[0].count
+                    )
                     groups.add(groupRepliedDetails)
                 }
                 var list: ArrayList<GroupNames> = groups.clone() as ArrayList<GroupNames>
