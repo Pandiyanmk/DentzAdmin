@@ -45,4 +45,5 @@
     <string name="ok">ठिक छ</string>
     <string name="notification_permission_is_required_to_show_notification">सूचना देखाउनको लागि सूचना अनुमति आवश्यक छ</string>
     <string name="alert">अलर्ट</string>
+    <string name="show_nepali_content">नेपाली सामग्री देखाउनुहोस्</string>
 </resources>

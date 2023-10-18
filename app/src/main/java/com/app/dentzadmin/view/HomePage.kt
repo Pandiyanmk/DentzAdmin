@@ -1,6 +1,7 @@
 package com.app.dentzadmin.view
 
 import android.content.Intent
+import android.graphics.Paint
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.os.Handler
@@ -15,7 +16,6 @@ import android.widget.RelativeLayout
 import android.widget.SeekBar
 import android.widget.TextView
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -53,6 +53,7 @@ class HomePage : BaseActivity() {
     var isStart = false
     var maxSelect = 0
     var isHasVideoUrl = ""
+    var nepaliContent = ""
     private var loading: ProgressBar? = null
     private var donarList: RecyclerView? = null
     private var groupList: RecyclerView? = null
@@ -68,6 +69,7 @@ class HomePage : BaseActivity() {
     private var forward: FloatingActionButton? = null
     private var send: FloatingActionButton? = null
     private var choosoptions: TextView? = null
+    private var switchnepali: TextView? = null
 
     private var textContent: LinearLayout? = null
     private var loaderView: RelativeLayout? = null
@@ -115,6 +117,7 @@ class HomePage : BaseActivity() {
         groupList = findViewById(R.id.groupList)
         messageList = findViewById(R.id.messageList)
         messagecontent = findViewById<TextView>(R.id.messagecontent)
+        switchnepali = findViewById<TextView>(R.id.switchnepali)
         textContent = findViewById(R.id.textContent)
         videoContent = findViewById(R.id.videoContent)
         audioContent = findViewById(R.id.audioContent)
@@ -134,6 +137,13 @@ class HomePage : BaseActivity() {
         textStart = findViewById(R.id.txtSongStart)
         textEnd = findViewById(R.id.txtSongEnd)
         seekMusicBar = findViewById(R.id.seekBar)
+        switchnepali!!.setPaintFlags(switchnepali!!.getPaintFlags() or Paint.UNDERLINE_TEXT_FLAG)
+        switchnepali!!.setOnClickListener {
+            if(nepaliContent.isNotEmpty()) {
+                messagecontent!!.text = nepaliContent
+                switchnepali!!.visibility = View.GONE
+            }
+        }
 
         send!!.setOnClickListener {
             var getCount: List<Group> = groupListData!!.filter { it.status == 1 }
@@ -318,6 +328,7 @@ class HomePage : BaseActivity() {
                     } else if (messageListData!![0].contentEnglish.endsWith("mp4")) {
                         setContent("video", messageListData!![0].contentEnglish)
                     } else {
+                        nepaliContent=messageListData!![0].contentNepali
                         setContent("text", messageListData!![0].contentEnglish)
                     }
                 }
@@ -385,6 +396,7 @@ class HomePage : BaseActivity() {
             } else if (messageListData!![postion].contentEnglish.endsWith("mp4")) {
                 setContent("video", messageListData!![postion].contentEnglish)
             } else {
+                nepaliContent=messageListData!![postion].contentNepali
                 setContent("text", messageListData!![postion].contentEnglish)
             }
             resetAllGroupData()
@@ -481,6 +493,7 @@ class HomePage : BaseActivity() {
                 videoContent!!.visibility = View.GONE
                 audioContent!!.visibility = View.GONE
                 messagecontent!!.text = content
+                switchnepali!!.visibility = View.VISIBLE
             }
 
             "audio" -> {

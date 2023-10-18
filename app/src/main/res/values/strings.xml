@@ -45,4 +45,5 @@
     <string name="ok">Ok</string>
     <string name="notification_permission_is_required_to_show_notification">Notification permission is required, to show notification</string>
     <string name="alert">Alert</string>
+    <string name="show_nepali_content">Show Nepali Content</string>
 </resources>
